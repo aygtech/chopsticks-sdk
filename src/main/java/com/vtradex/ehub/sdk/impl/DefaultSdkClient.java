@@ -21,6 +21,9 @@ public class DefaultSdkClient extends DefaultModernClient implements SdkClient{
 
 	public DefaultSdkClient(String groupName) {
 		super(groupName);
+		setInvokeExecutable(false);
+		setOrderedNoticeExecutable(false);
+		setInvokable(false);
 	}
 	
 	@Override
