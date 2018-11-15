@@ -18,7 +18,7 @@ public class DefaultSdkClient extends DefaultModernClient implements SdkClient{
 	static {
 		System.setProperty("rocketmq.namesrv.domain", "ehub.server.com:18080");
 	}
-
+	
 	public DefaultSdkClient(String groupName) {
 		super(groupName);
 		setInvokeExecutable(false);
