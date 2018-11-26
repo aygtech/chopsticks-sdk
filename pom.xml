@@ -56,6 +56,8 @@
 					<artifactSet>
 						<excludes>
 							<exclude>org.slf4j:slf4j-api</exclude>
+							<exclude>ch.qos.logback:logback-core</exclude>
+							<exclude>ch.qos.logback:logback-classic</exclude>
 						</excludes>
 					</artifactSet>
 					<relocations>

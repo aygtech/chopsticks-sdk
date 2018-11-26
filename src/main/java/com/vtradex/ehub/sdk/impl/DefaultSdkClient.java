@@ -44,4 +44,5 @@ public class DefaultSdkClient extends DefaultModernClient implements SdkClient{
 	public void setServices(Map<Class<?>, Object> services){
 		super.register(services);
 	}
+	
 }
