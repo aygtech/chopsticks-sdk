@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.vtradex.ehub</groupId>
 	<artifactId>ehub-sdk</artifactId>
-	<version>1.0.7-SNAPSHOT</version>
+	<version>1.0.8.3-SNAPSHOT</version>
 	<properties>
 		<maven.test.skip>true</maven.test.skip>
 	</properties>
@@ -18,7 +18,7 @@
 		<dependency>
 			<groupId>com.chopsticks.sdk</groupId>
 			<artifactId>chopsticks-core-rocketmq-modern</artifactId>
-			<version>1.0.7-SNAPSHOT</version>
+			<version>1.0.8.3-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 	<build>
@@ -67,6 +67,10 @@
 						</relocation>
 						<relocation>
 							<pattern>org.apache.</pattern>
+							<excludes>
+								<exclude>org.apache.commons.logging.LogFactory</exclude>
+								<exclude>org.apache.commons.logging.Log</exclude>
+							</excludes>
 							<shadedPattern>com.vtradex.ehub.plugins.org.apache.</shadedPattern>
 						</relocation>
 						<relocation>

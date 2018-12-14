@@ -21,6 +21,8 @@ public class DefaultSdkClient extends DefaultModernClient implements SdkClient{
 	
 	public DefaultSdkClient(String groupName) {
 		super(groupName);
+		setNoticeExecutable(true);
+		setDelayNoticeExecutable(true);
 		setInvokeExecutable(false);
 		setOrderedNoticeExecutable(false);
 		setInvokable(false);
@@ -45,4 +47,40 @@ public class DefaultSdkClient extends DefaultModernClient implements SdkClient{
 		super.register(services);
 	}
 	
+	@Override
+	public void setNoticeExecutableNum(int noticeExecutableNum) {
+		super.setNoticeExecutableNum(noticeExecutableNum);
+	}
+	@Override
+	public void setNoticeExecutable(boolean noticeExecutable) {
+		super.setNoticeExecutable(noticeExecutable);
+	}
+	@Override
+	public void setDelayNoticeExecutableNum(int delayNoticeExecutableNum) {
+		super.setDelayNoticeExecutableNum(delayNoticeExecutableNum);
+	}
+	@Override
+	public void setDelayNoticeExecutable(boolean delayNoticeExecutable) {
+		super.setDelayNoticeExecutable(delayNoticeExecutable);
+	}
+	@Override
+	public void setInvokable(boolean invokable) {
+		super.setInvokable(invokable);
+	}
+	@Override
+	public void setInvokeExecutable(boolean invokeExecutable) {
+		super.setInvokeExecutable(invokeExecutable);
+	}
+	@Override
+	public void setInvokeExecutableNum(int invokeExecutableNum) {
+		super.setInvokeExecutableNum(invokeExecutableNum);
+	}
+	@Override
+	public void setOrderedNoticeExecutable(boolean orderedNoticeExecutable) {
+		super.setOrderedNoticeExecutable(orderedNoticeExecutable);
+	}
+	@Override
+	public void setOrderedNoticeExecutableNum(int orderedNoticeExecutableNum) {
+		super.setOrderedNoticeExecutableNum(orderedNoticeExecutableNum);
+	}
 }
