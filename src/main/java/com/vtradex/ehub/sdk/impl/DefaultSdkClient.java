@@ -13,6 +13,11 @@ import com.vtradex.ehub.sdk.caller.SdkExtBean;
 import com.vtradex.ehub.sdk.caller.SdkNoticeBean;
 import com.vtradex.ehub.sdk.caller.SdkNoticeBeanProxy;
 
+/**
+ * 默认客户端
+ * @author zilong.li
+ *
+ */
 public class DefaultSdkClient extends DefaultModernClient implements SdkClient{
 	
 	static {
