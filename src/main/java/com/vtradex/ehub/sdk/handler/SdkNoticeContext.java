@@ -8,9 +8,4 @@ public class SdkNoticeContext extends DefaultModerNoticeContext{
 	public SdkNoticeContext(BaseNoticeContext ctx) {
 		super(ctx);
 	}
-
-	public SdkNoticeContext(String id, String originId, int reconsumeTimes) {
-		super(id, originId, reconsumeTimes);
-	}
-
 }
