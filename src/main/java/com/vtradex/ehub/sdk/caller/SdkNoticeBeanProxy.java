@@ -27,7 +27,7 @@ public class SdkNoticeBeanProxy extends NoticeBeanProxy {
 			TimeUnit delayTimeUnit = (TimeUnit)args[2];
 			long curDelayMillis = delayTimeUnit.toMillis(delay);
 			if(curDelayMillis < MIN_DELAY_MLLLIS) {
-				log.warn("delay must be >= 10s, curDelayMillis(ms) : {}, method : {}, interface : {}", curDelayMillis, method.getName(), getClazz());
+//				log.warn("delay must be >= 10s, curDelayMillis(ms) : {}, method : {}, interface : {}", curDelayMillis, method.getName(), getClazz());
 //				args[1] = MIN_DELAY_MLLLIS;
 //				args[2] = TimeUnit.MILLISECONDS;
 			}

@@ -3,6 +3,8 @@ package com.vtradex.ehub.sdk.impl;
 
 import java.util.Map;
 
+import org.apache.rocketmq.client.log.ClientLogger;
+
 import com.chopsticks.core.modern.caller.ExtBean;
 import com.chopsticks.core.modern.caller.NoticeBean;
 import com.chopsticks.core.rocketmq.DefaultClient;
@@ -22,6 +24,9 @@ public class DefaultSdkClient extends DefaultModernClient implements SdkClient{
 	
 	static {
 		System.setProperty("rocketmq.namesrv.domain", "ehub.server.com:18080");
+		System.setProperty(ClientLogger.CLIENT_LOG_ROOT, System.getProperty("user.dir"));
+		System.setProperty(ClientLogger.CLIENT_LOG_MAXINDEX, "3");
+		System.setProperty(ClientLogger.CLIENT_LOG_FILESIZE, (1024 * 1024 * 100) + "");
 	}
 	
 	public DefaultSdkClient(String groupName) {
