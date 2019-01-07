@@ -27,7 +27,8 @@ public class DefaultSdkClient extends DefaultModernClient implements SdkClient{
 		System.setProperty("rocketmq.namesrv.domain", "ehub.server.com:18080");
 		System.setProperty(ClientLogger.CLIENT_LOG_ROOT, System.getProperty("user.dir") + File.separator + "logs");
 		System.setProperty(ClientLogger.CLIENT_LOG_MAXINDEX, "3");
-		System.setProperty(ClientLogger.CLIENT_LOG_FILESIZE, (1024 * 1024 * 100) + "");
+		System.setProperty(ClientLogger.CLIENT_LOG_FILESIZE, (1024 * 1024 * 50) + "");
+		System.setProperty(ClientLogger.CLIENT_LOG_FILENAME, "ehub-sdk.log");
 	}
 	
 	public DefaultSdkClient(String groupName) {
