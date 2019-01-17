@@ -11,12 +11,14 @@ import com.chopsticks.core.modern.caller.NoticeBean;
 import com.chopsticks.core.rocketmq.DefaultClient;
 import com.chopsticks.core.rocketmq.modern.DefaultModernClient;
 import com.chopsticks.core.rocketmq.modern.caller.BaseProxy;
+import com.google.common.base.Strings;
 import com.vtradex.ehub.sdk.SdkClient;
 import com.vtradex.ehub.sdk.caller.SdkBeanProxy;
 import com.vtradex.ehub.sdk.caller.SdkExtBean;
 import com.vtradex.ehub.sdk.caller.SdkExtBeanProxy;
 import com.vtradex.ehub.sdk.caller.SdkNoticeBean;
 import com.vtradex.ehub.sdk.caller.SdkNoticeBeanProxy;
+import com.vtradex.ehub.sdk.exception.SdkException;
 
 /**
  * 默认客户端
@@ -138,5 +140,14 @@ public class DefaultSdkClient extends DefaultModernClient implements SdkClient{
 	}
 	public void setUniKey(String uniKey) {
 		this.uniKey = uniKey;
+	}
+	public void setServerPath(String serverPath) {
+		if(!Strings.isNullOrEmpty(serverPath)) {
+			if(!serverPath.contains(":")) {
+				throw new SdkException("server path must set port").setCode(SdkException.SERVER_PATH_NOT_PORT);
+			}else {
+				System.setProperty("rocketmq.namesrv.domain", serverPath);
+			}
+		}
 	}
 }
