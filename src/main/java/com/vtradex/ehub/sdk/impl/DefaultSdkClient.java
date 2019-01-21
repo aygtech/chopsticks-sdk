@@ -150,4 +150,9 @@ public class DefaultSdkClient extends DefaultModernClient implements SdkClient{
 			}
 		}
 	}
+	
+	@Override
+	public void setRetryCount(int retryCount) {
+		super.setRetryCount(retryCount);
+	}
 }
