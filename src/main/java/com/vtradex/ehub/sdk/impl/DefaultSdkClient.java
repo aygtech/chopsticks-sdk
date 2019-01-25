@@ -29,6 +29,7 @@ public class DefaultSdkClient extends DefaultModernClient implements SdkClient{
 	
 	private String orgKey;
 	private String uniKey;
+	private volatile boolean started;
 	
 	public static final String ORG_KEY = "_ORG_KEY_";
 	public static final String UNI_KEY = "_UNI_KEY_";
@@ -155,4 +156,15 @@ public class DefaultSdkClient extends DefaultModernClient implements SdkClient{
 	public void setRetryCount(int retryCount) {
 		super.setRetryCount(retryCount);
 	}
+	
+	@Override
+	public synchronized void start() {
+		super.start();
+		started = true;
+	}
+	
+	public boolean isStarted() {
+		return started;
+	}
+	
 }
