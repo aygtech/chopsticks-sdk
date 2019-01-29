@@ -12,19 +12,21 @@ public class SdkNoticeResult extends BaseNoticeResult {
 		super(null);
 		this.result = result;
 	}
-	
+	@Override
+	public String getId() {
+		return result.getId();
+	}
 	@Override
 	public Set<String> getTraceNos() {
 		return result.getTraceNos();
 	}
 	@Override
-	public String getId() {
-		return result.getId();
+	public String getOriginId() {
+		return result.getOriginId();
 	}
-
 	@Override
 	public String toString() {
-		return "SdkNoticeResult [getTraceNos()=" + getTraceNos() + ", getId()=" + getId() + "]";
+		return "SdkNoticeResult [getId()=" + getId() + ", getTraceNos()=" + getTraceNos() + ", getOriginId()="
+				+ getOriginId() + "]";
 	}
-	
 }
