@@ -55,6 +55,10 @@ public class DefaultSdkClient extends DefaultModernClient implements SdkClient{
 		setInvokable(false);
 	}
 	
+	public SdkNoticeBean getSdkNoticeBean(Class<?> clazz) {
+		return getNoticeBean(clazz);
+	}
+	
 	@Override
 	protected Class<? extends NoticeBean> getNoticeBeanClazz() {
 		return SdkNoticeBean.class;
@@ -66,6 +70,14 @@ public class DefaultSdkClient extends DefaultModernClient implements SdkClient{
 		extParams.put(ORG_KEY, getOrgKey());
 		extParams.put(UNI_KEY, getUniKey());
 		return proxy;
+	}
+	
+	public SdkExtBean getSdkExtBean(Class<?> clazz) {
+		return getExtBean(clazz);
+	}
+	
+	public SdkExtBean getSdkExtBean(String clazzName) {
+		return getExtBean(clazzName);
 	}
 	
 	@Override
@@ -156,13 +168,23 @@ public class DefaultSdkClient extends DefaultModernClient implements SdkClient{
 	public void setRetryCount(int retryCount) {
 		super.setRetryCount(retryCount);
 	}
-	
+	@Override
+	public void setOrderedNoticeExecutableRetryCount(int orderedNoticeExecutableRetryCount) {
+		super.setOrderedNoticeExecutableRetryCount(orderedNoticeExecutableRetryCount);
+	}
+	@Override
+	public void setNoticeExcecutableRetryCount(int noticeExcecutableRetryCount) {
+		super.setNoticeExcecutableRetryCount(noticeExcecutableRetryCount);
+	}
+	@Override
+	public void setDelayNoticeExecutableRetryCount(int delayNoticeExecutableRetryCount) {
+		super.setDelayNoticeExecutableRetryCount(delayNoticeExecutableRetryCount);
+	}
 	@Override
 	public synchronized void start() {
 		super.start();
 		started = true;
 	}
-	
 	public boolean isStarted() {
 		return started;
 	}
