@@ -188,5 +188,27 @@ public class DefaultSdkClient extends DefaultModernClient implements SdkClient{
 	public boolean isStarted() {
 		return started;
 	}
+	@Override
+	public void setMaxExecutableTime(long maxExecutableTime) {
+		super.setMaxExecutableTime(maxExecutableTime);
+	}
+	@Override
+	public synchronized void shutdown() {
+		super.shutdown();
+		started = false;
+	}
+
+	@Override
+	public void setNoticeBeginExecutableTime(long noticeBeginExecutableTime) {
+		super.setNoticeBeginExecutableTime(noticeBeginExecutableTime);
+	}
+	@Override
+	public void setDelayNoticeBeginExecutableTime(long delayNoticeBeginExecutableTime) {
+		super.setDelayNoticeBeginExecutableTime(delayNoticeBeginExecutableTime);
+	}
+	@Override
+	public void setOrderedNoticeBeginExecutableTime(long orderedNoticeBeginExecutableTime) {
+		super.setOrderedNoticeBeginExecutableTime(orderedNoticeBeginExecutableTime);
+	}
 	
 }
