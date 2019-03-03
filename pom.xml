@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.vtradex.ehub</groupId>
 	<artifactId>ehub-sdk</artifactId>
-	<version>1.1.8.2-SNAPSHOT</version>
+	<version>1.1.9-SNAPSHOT</version>
 	<properties>
 		<maven.test.skip>true</maven.test.skip>
 	</properties>
@@ -18,7 +18,7 @@
 		<dependency>
 			<groupId>com.chopsticks.sdk</groupId>
 			<artifactId>chopsticks-core-rocketmq-modern</artifactId>
-			<version>1.1.8.2-SNAPSHOT</version>
+			<version>1.1.9-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 	<build>
@@ -62,6 +62,10 @@
 					</artifactSet>
 					<relocations>
 						<relocation>
+							<pattern>com.chopsticks.core.rocketmq.</pattern>
+							<shadedPattern>com.vtradex.ehub.core.rmq.</shadedPattern>
+						</relocation>
+						<relocation>
 							<pattern>com.chopsticks.</pattern>
 							<shadedPattern>com.vtradex.ehub.</shadedPattern>
 						</relocation>
@@ -93,30 +97,50 @@
 			</plugin>
 			<!-- 
 			<plugin>
-                <groupId>com.github.wvengen</groupId>
-                <artifactId>proguard-maven-plugin</artifactId>
-                <version>2.0.14</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>proguard</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<configuration>
+					<encoding>UTF-8</encoding>
+					<aggregate>true</aggregate>
+					<charset>UTF-8</charset>
+					<docencoding>UTF-8</docencoding>
+				</configuration>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			 -->
+			<!-- 
+			<plugin>
+				<groupId>com.github.wvengen</groupId>
+				<artifactId>proguard-maven-plugin</artifactId>
+				<version>2.0.14</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>proguard</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<obfuscate>true</obfuscate>
 					<attach>true</attach>
-                    <obfuscate>true</obfuscate>					
-                    <attachArtifactClassifier>pg</attachArtifactClassifier>
-                    <proguardInclude>${basedir}/proguard.conf</proguardInclude>
-                    <libs>
-                        <lib>${java.home}/lib/rt.jar</lib>
-                        <lib>${java.home}/lib/jsse.jar</lib>
-                    </libs>
-                    <addMavenDescriptor>false</addMavenDescriptor>
-                </configuration>
-            </plugin>
-             -->
+					<attachArtifactClassifier></attachArtifactClassifier>
+					<proguardInclude>${basedir}/proguard.conf</proguardInclude>
+					<libs>
+						<lib>${java.home}/lib/rt.jar</lib>
+						<lib>${java.home}/lib/jsse.jar</lib>
+					</libs>
+					<addMavenDescriptor>false</addMavenDescriptor>
+				</configuration>
+			</plugin>
+			 -->
 		</plugins>
 	</build>
 	<distributionManagement>

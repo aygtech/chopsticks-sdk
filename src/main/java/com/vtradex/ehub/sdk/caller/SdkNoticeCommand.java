@@ -9,15 +9,6 @@ public class SdkNoticeCommand extends DefaultModernNoticeCommand {
 		super(method, params);
 	}
 	
-	public SdkNoticeCommand addTraceNo(String traceNo) {
-		getTraceNos().add(traceNo);
-		return this;
-	}
-	
-	public SdkNoticeCommand addExtParam(String key, String value) {
-		getExtParams().put(key, value);
-		return this;
-	}
 	public SdkNoticeCommand setOrgKey(String orgKey) {
 		return addExtParam(DefaultSdkClient.ORG_KEY, orgKey);
 	}
