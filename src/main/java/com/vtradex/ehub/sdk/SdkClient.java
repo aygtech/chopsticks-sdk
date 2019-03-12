@@ -22,18 +22,21 @@ public interface SdkClient{
 	/**
 	 * 获取异步调用 bean
 	 * @param clazz 接口
+	 * @param <T> {@link SdkNoticeBean} 接口
 	 * @return 代理实现类
 	 */
 	public <T extends SdkNoticeBean> T getSdkNoticeBean(Class<?> clazz);
 	/**
 	 * 获取超级调用 bean
 	 * @param clazz 接口
+	 * @param <T> {@link SdkExtBean} 接口
 	 * @return 代理实现类
 	 */
 	public <T extends SdkExtBean> T getSdkExtBean(Class<?> clazz);
 	/**
 	 * 获取超级调用 bean
 	 * @param clazzName 接口全类名
+	 * @param <T> {@link SdkExtBean} 接口
 	 * @return 代理实现类
 	 */
 	public <T extends SdkExtBean> T getSdkExtBean(String clazzName);

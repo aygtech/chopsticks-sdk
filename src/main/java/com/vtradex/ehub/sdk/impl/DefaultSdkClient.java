@@ -119,6 +119,7 @@ public class DefaultSdkClient implements SdkClient{
 	 * 废弃，版本变更会直接删除
 	 * {@link #getSdkNoticeBean(Class)}
 	 * @param clazz 接口
+	 * @param <T> {@link NoticeBean} 接口
 	 * @return 代理实现类
 	 */
 	@Deprecated
@@ -133,6 +134,7 @@ public class DefaultSdkClient implements SdkClient{
 	 * 废弃，版本变更会直接删除
 	 * {@link #getSdkExtBean(Class)}
 	 * @param clazz 接口
+	 * @param <T> {@link ExtBean} 接口
 	 * @return 代理实现类
 	 */
 	@Deprecated
@@ -147,6 +149,7 @@ public class DefaultSdkClient implements SdkClient{
 	 * 废弃，版本变更会直接删除
 	 * {@link #getSdkExtBean(String)}
 	 * @param clazzName 接口全类名
+	 * @param <T> {@link ExtBean} 接口
 	 * @return 代理实现类
 	 */
 	@Deprecated
