@@ -25,11 +25,13 @@ import com.vtradex.ehub.sdk.exception.SdkException;
  * @author zilong.li
  *
  */
-public class DefaultSdkClient extends DefaultModernClient implements SdkClient{
+public class DefaultSdkClient implements SdkClient{
 	
 	private String orgKey;
 	private String uniKey;
 	private volatile boolean started;
+	
+	private DefaultModernClient innerClient;
 	
 	public static final String ORG_KEY = "_ORG_KEY_";
 	public static final String UNI_KEY = "_UNI_KEY_";
@@ -53,142 +55,200 @@ public class DefaultSdkClient extends DefaultModernClient implements SdkClient{
 	 * @param groupName 集群名
 	 */
 	public DefaultSdkClient(String groupName) {
-		super(groupName);
-		setNoticeExecutable(true);
-		setDelayNoticeExecutable(true);
-		setInvokeExecutable(false);
-		setOrderedNoticeExecutable(false);
-		setInvokable(false);
+		innerClient = buildInnerClient(groupName);
+		this.setNoticeExecutable(true);
+		this.setDelayNoticeExecutable(true);
+		this.setInvokeExecutable(false);
+		this.setOrderedNoticeExecutable(false);
+		this.setInvokable(false);
 	}
 	
+	private DefaultModernClient buildInnerClient(String groupName) {
+		DefaultModernClient innerClient = new DefaultModernClient(groupName) {
+			@Override
+			protected BaseProxy getBeanProxy(Class<?> clazz, DefaultClient client) {
+				BaseProxy proxy = new SdkBeanProxy(clazz, client);
+				Map<String, String> extParams = proxy.getExtParams();
+				extParams.put(ORG_KEY, getOrgKey());
+				extParams.put(UNI_KEY, getUniKey());
+				return proxy;
+			}
+			@Override
+			protected Class<? extends NoticeBean> getNoticeBeanClazz() {
+				return SdkNoticeBean.class;
+			}
+			@Override
+			protected BaseProxy getNoticeBeanProxy(Class<?> clazz, DefaultClient client) {
+				BaseProxy proxy = new SdkNoticeBeanProxy(clazz, client);
+				Map<String, String> extParams = proxy.getExtParams();
+				extParams.put(ORG_KEY, getOrgKey());
+				extParams.put(UNI_KEY, getUniKey());
+				return proxy;
+			}
+			@Override
+			protected Class<? extends ExtBean> getExtBeanClazz() {
+				return SdkExtBean.class;
+			}
+			@Override
+			protected BaseProxy getExtBeanProxy(String clazzName, DefaultClient client) {
+				BaseProxy proxy = new SdkExtBeanProxy(clazzName, client);
+				Map<String, String> extParams = proxy.getExtParams();
+				extParams.put(ORG_KEY, getOrgKey());
+				extParams.put(UNI_KEY, getUniKey());
+				return proxy;
+			}
+		};
+		return innerClient;
+	}
 	/**
-	 * 获取异步调用bean
-	 * @param clazz 类型，支持方法，参数校验
-	 * @return 异步调用bean
+	 * 废弃，版本变更会直接删除
+	 * {@link #getSdkBean(Class)}
+	 * @param clazz 接口
+	 * @param <T> 接口
+	 * @return 代理实现类
 	 */
-	public SdkNoticeBean getSdkNoticeBean(Class<?> clazz) {
-		return getNoticeBean(clazz);
-	}
-	
-	@Override
-	protected Class<? extends NoticeBean> getNoticeBeanClazz() {
-		return SdkNoticeBean.class;
+	@Deprecated
+	public <T> T getBean(Class<T> clazz) {
+		return getSdkBean(clazz);
 	}
 	@Override
-	protected BaseProxy getNoticeBeanProxy(Class<?> clazz, DefaultClient client) {
-		BaseProxy proxy = new SdkNoticeBeanProxy(clazz, client);
-		Map<String, String> extParams = proxy.getExtParams();
-		extParams.put(ORG_KEY, getOrgKey());
-		extParams.put(UNI_KEY, getUniKey());
-		return proxy;
+	public <T> T getSdkBean(Class<T> clazz) {
+		return innerClient.getBean(clazz);
 	}
-	
 	/**
-	 * 获取扩展bean，可实现无桩化调用，不支持方法，参数校验
+	 * 废弃，版本变更会直接删除
+	 * {@link #getSdkNoticeBean(Class)}
+	 * @param clazz 接口
+	 * @return 代理实现类
+	 */
+	@Deprecated
+	public <T extends NoticeBean> T getNoticeBean(Class<?> clazz) {
+		return getSdkNoticeBean(clazz);
+	}
+	@Override
+	public <T extends SdkNoticeBean> T getSdkNoticeBean(Class<?> clazz) {
+		return innerClient.getNoticeBean(clazz);
+	}
+	/**
+	 * 废弃，版本变更会直接删除
+	 * {@link #getSdkExtBean(Class)}
+	 * @param clazz 接口
+	 * @return 代理实现类
+	 */
+	@Deprecated
+	public <T extends ExtBean> T getExtBean(Class<?> clazz) {
+		return getSdkExtBean(clazz);
+	}
+	@Override
+	public <T extends SdkExtBean> T getSdkExtBean(Class<?> clazz) {
+		return innerClient.getExtBean(clazz.getName());
+	}
+	/**
+	 * 废弃，版本变更会直接删除
 	 * {@link #getSdkExtBean(String)}
-	 * @param clazz 接口类
-	 * @return 扩展调用bean
+	 * @param clazzName 接口全类名
+	 * @return 代理实现类
 	 */
-	public SdkExtBean getSdkExtBean(Class<?> clazz) {
-		return getExtBean(clazz.getName());
+	@Deprecated
+	public <T extends ExtBean> T getExtBean(String clazzName) {
+		return getSdkExtBean(clazzName);
+	}
+	@Override
+	public <T extends SdkExtBean> T getSdkExtBean(String clazzName) {
+		return innerClient.getExtBean(clazzName);
 	}
 	/**
-	 * 获取扩展bean，可实现无桩化调用，不支持方法，参数校验
-	 * @param clazzName 接口类全名
-	 * @return 扩展调用bean
+	 * 废弃，版本变更会直接删除
+	 * {@link #setServices(Map)}
+	 * @param services services 服务，key 为 接口类定义，value 为接口实现类实例
 	 */
-	public SdkExtBean getSdkExtBean(String clazzName) {
-		return getExtBean(clazzName);
-	}
-	
-	@Override
-	protected Class<? extends ExtBean> getExtBeanClazz() {
-		return SdkExtBean.class;
+	@Deprecated
+	public void register(Map<Class<?>, Object> services) {
+		setServices(services);
 	}
 	@Override
-	protected BaseProxy getExtBeanProxy(String clazzName, DefaultClient client) {
-		BaseProxy proxy = new SdkExtBeanProxy(clazzName, client);
-		Map<String, String> extParams = proxy.getExtParams();
-		extParams.put(ORG_KEY, getOrgKey());
-		extParams.put(UNI_KEY, getUniKey());
-		return proxy;
-	}
-	
-	@Override
-	protected BaseProxy getBeanProxy(Class<?> clazz, DefaultClient client) {
-		BaseProxy proxy = new SdkBeanProxy(clazz, client);
-		Map<String, String> extParams = proxy.getExtParams();
-		extParams.put(ORG_KEY, getOrgKey());
-		extParams.put(UNI_KEY, getUniKey());
-		return proxy;
-	}
-	
 	public void setServices(Map<Class<?>, Object> services){
-		super.register(services);
+		innerClient.register(services);
 	}
-	
-	/**
-	 * 设置无序异步的执行线程数量，默认为 10 个
-	 */
 	@Override
-	public void setNoticeExecutableNum(int noticeExecutableNum) {
-		super.setNoticeExecutableNum(noticeExecutableNum);
+	public synchronized void start() {
+		innerClient.start();
+		started = true;
+	}
+	@Override
+	public synchronized void shutdown() {
+		innerClient.shutdown();
+		started = false;
 	}
 	/**
-	 * 设置是否支持无序异步执行，默认 true
+	 * 获取客户端启动状态
+	 * @return 是否启动
 	 */
-	@Override
+	public boolean isStarted() {
+		return started;
+	}
+	/**
+	 * 设置是否支持异步执行，默认 true
+	 * @param noticeExecutable 是否支持
+	 */
 	public void setNoticeExecutable(boolean noticeExecutable) {
-		super.setNoticeExecutable(noticeExecutable);
+		innerClient.setNoticeExecutable(noticeExecutable);
 	}
 	/**
-	 * 设置无序延迟异步的执行线程数量，默认为 10 个
+	 * 设置延迟执行的线程数，默认 10
+	 * @param noticeExecutableNum 执行线程数
 	 */
-	@Override
-	public void setDelayNoticeExecutableNum(int delayNoticeExecutableNum) {
-		super.setDelayNoticeExecutableNum(delayNoticeExecutableNum);
+	public void setNoticeExecutableNum(int noticeExecutableNum) {
+		innerClient.setNoticeExecutableNum(noticeExecutableNum);
 	}
 	/**
-	 * 设置是否支持无序延迟异步执行，默认 true
+	 * 设置是否支持延迟异步执行，默认 true
+	 * @param delayNoticeExecutable 是否支持
 	 */
-	@Override
 	public void setDelayNoticeExecutable(boolean delayNoticeExecutable) {
-		super.setDelayNoticeExecutable(delayNoticeExecutable);
+		innerClient.setDelayNoticeExecutable(delayNoticeExecutable);
 	}
 	/**
-	 * 设置是否支持同步调用，默认 false
+	 * 设置延迟异步执行的线程数，默认 10
+	 * @param delayNoticeExecutableNum 执行线程数
 	 */
-	@Override
-	public void setInvokable(boolean invokable) {
-		super.setInvokable(invokable);
+	public void setDelayNoticeExecutableNum(int delayNoticeExecutableNum) {
+		innerClient.setDelayNoticeExecutableNum(delayNoticeExecutableNum);
 	}
 	/**
 	 * 设置是否支持同步执行，默认 false
+	 * @param invokeExecutable 是否支持
 	 */
-	@Override
 	public void setInvokeExecutable(boolean invokeExecutable) {
-		super.setInvokeExecutable(invokeExecutable);
+		innerClient.setInvokeExecutable(invokeExecutable);
 	}
 	/**
 	 * 设置同步的执行线程数量，默认为 15 个
+	 * @param invokeExecutableNum 执行线程数
 	 */
-	@Override
 	public void setInvokeExecutableNum(int invokeExecutableNum) {
-		super.setInvokeExecutableNum(invokeExecutableNum);
+		innerClient.setInvokeExecutableNum(invokeExecutableNum);
 	}
-	@Override
+	/**
+	 * 设置是否支持顺序异步执行，默认 false
+	 * @param orderedNoticeExecutable 是否支持
+	 */
 	public void setOrderedNoticeExecutable(boolean orderedNoticeExecutable) {
-		super.setOrderedNoticeExecutable(orderedNoticeExecutable);
+		innerClient.setOrderedNoticeExecutable(orderedNoticeExecutable);
 	}
 	/**
 	 * 设置顺序异步的执行线程数量，默认为 5 个
+	 * @param orderedNoticeExecutableNum 执行线程数
 	 */
-	@Override
 	public void setOrderedNoticeExecutableNum(int orderedNoticeExecutableNum) {
-		super.setOrderedNoticeExecutableNum(orderedNoticeExecutableNum);
+		innerClient.setOrderedNoticeExecutableNum(orderedNoticeExecutableNum);
 	}
-	public String getOrgKey() {
-		return orgKey;
+	/**
+	 * 设置是否支持同步调用，默认 false
+	 * @param invokable 是否支持
+	 */
+	public void setInvokable(boolean invokable) {
+		innerClient.setInvokable(invokable);
 	}
 	/**
 	 * 指定默认调用身份
@@ -197,8 +257,8 @@ public class DefaultSdkClient extends DefaultModernClient implements SdkClient{
 	public void setOrgKey(String orgKey) {
 		this.orgKey = orgKey;
 	}
-	public String getUniKey() {
-		return uniKey;
+	public String getOrgKey() {
+		return orgKey;
 	}
 	/**
 	 * 指定默认调用身份
@@ -206,6 +266,9 @@ public class DefaultSdkClient extends DefaultModernClient implements SdkClient{
 	 */
 	public void setUniKey(String uniKey) {
 		this.uniKey = uniKey;
+	}
+	public String getUniKey() {
+		return uniKey;
 	}
 	/**
 	 * 设置服务器地址，格式为 ip:port
@@ -220,79 +283,64 @@ public class DefaultSdkClient extends DefaultModernClient implements SdkClient{
 			}
 		}
 	}
-	
 	/**
-	 * 设置重试次数, 同时调用三种异步的重试次数
+	 * 设置异步执行失败重试次数, 默认都是 Integer.MAX_VALUE
 	 * {@link #setNoticeExcecutableRetryCount(int)}
 	 * {@link #setDelayNoticeExecutableRetryCount(int)}
 	 * {@link #setOrderedNoticeExecutableRetryCount(int)}
+	 * @param retryCount 重试次数
 	 */
-	@Override
 	public void setRetryCount(int retryCount) {
-		super.setRetryCount(retryCount);
+		innerClient.setRetryCount(retryCount);
 	}
 	/**
-	 * 设置顺序异步的重试次数，默认为无限次
+	 * 单独设置无序异步重试次数
+	 * @param noticeExcecutableRetryCount 重试次数
 	 */
-	@Override
-	public void setOrderedNoticeExecutableRetryCount(int orderedNoticeExecutableRetryCount) {
-		super.setOrderedNoticeExecutableRetryCount(orderedNoticeExecutableRetryCount);
-	}
-	/**
-	 * 设置无序异步的重试次数，默认为无限次
-	 */
-	@Override
 	public void setNoticeExcecutableRetryCount(int noticeExcecutableRetryCount) {
-		super.setNoticeExcecutableRetryCount(noticeExcecutableRetryCount);
+		innerClient.setNoticeExcecutableRetryCount(noticeExcecutableRetryCount);
 	}
 	/**
-	 * 设置无序延迟异步的重试次数，默认为无限次
+	 * 单独设置延迟无序异步执行失败重试次数
+	 * @param delayNoticeExecutableRetryCount 重试次数
 	 */
-	@Override
 	public void setDelayNoticeExecutableRetryCount(int delayNoticeExecutableRetryCount) {
-		super.setDelayNoticeExecutableRetryCount(delayNoticeExecutableRetryCount);
+		innerClient.setDelayNoticeExecutableRetryCount(delayNoticeExecutableRetryCount);
 	}
-	@Override
-	public synchronized void start() {
-		super.start();
-		started = true;
-	}
-	public boolean isStarted() {
-		return started;
-	}
-	@Override
-	public synchronized void shutdown() {
-		super.shutdown();
-		started = false;
-	}
-	
 	/**
-	 * 设定最大执行时间，超过此时间服务器默认认为失败触发重试
+	 * 单独设置顺序异步执行失败重试次数
+	 * @param orderedNoticeExecutableRetryCount 重试次数
 	 */
-	@Override
+	public void setOrderedNoticeExecutableRetryCount(int orderedNoticeExecutableRetryCount) {
+		innerClient.setOrderedNoticeExecutableRetryCount(orderedNoticeExecutableRetryCount);
+	}
+	/**
+	 * 设置执行时间，超过则失败，默认 15 分钟
+	 * @param maxExecutableTime 最大执行时间
+	 */
 	public void setMaxExecutableTime(long maxExecutableTime) {
-		super.setMaxExecutableTime(maxExecutableTime);
+		innerClient.setMaxExecutableTime(maxExecutableTime);
 	}
 	/**
-	 * 指定无序异步开始处理的时间，参数为毫秒
+	 * 设置无序异步最早开始处理的毫秒时间，小于此毫秒数的直接结束，不经过业务处理
+	 * @param noticeBeginExecutableTime 开始执行时间
 	 */
-	@Override
 	public void setNoticeBeginExecutableTime(long noticeBeginExecutableTime) {
-		super.setNoticeBeginExecutableTime(noticeBeginExecutableTime);
+		innerClient.setNoticeBeginExecutableTime(noticeBeginExecutableTime);
 	}
 	/**
-	 * 指定延迟异步开始处理的时间，参数为毫秒
+	 * 设置延迟无序异步最早开始处理的毫秒时间，小于此毫秒数的直接结束，不经过业务处理
+	 * @param delayNoticeBeginExecutableTime 开始执行时间
 	 */
-	@Override
 	public void setDelayNoticeBeginExecutableTime(long delayNoticeBeginExecutableTime) {
-		super.setDelayNoticeBeginExecutableTime(delayNoticeBeginExecutableTime);
+		innerClient.setDelayNoticeBeginExecutableTime(delayNoticeBeginExecutableTime);
 	}
 	/**
-	 * 指定顺序异步开始处理的时间，参数为毫秒
+	 * 设置顺序异步最早开始处理的毫秒时间，小于此毫秒数的直接结束，不经过业务处理
+	 * @param orderedNoticeBeginExecutableTime 开始执行时间
 	 */
-	@Override
 	public void setOrderedNoticeBeginExecutableTime(long orderedNoticeBeginExecutableTime) {
-		super.setOrderedNoticeBeginExecutableTime(orderedNoticeBeginExecutableTime);
+		innerClient.setOrderedNoticeBeginExecutableTime(orderedNoticeBeginExecutableTime);
 	}
 	
 }

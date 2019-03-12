@@ -35,4 +35,16 @@ public class SdkInvokeCommand extends DefaultModernInvokeCommand {
 		return addExtParam(DefaultSdkClient.UNI_KEY, uniKey);
 	}
 	
+	@SuppressWarnings("unchecked")
+	@Override
+	public SdkInvokeCommand addExtParam(String key, String value) {
+		return super.addExtParam(key, value);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public SdkInvokeCommand addTraceNo(String traceNo) {
+		return super.addTraceNo(traceNo);
+	}
+	
 }

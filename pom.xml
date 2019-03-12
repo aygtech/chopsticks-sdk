@@ -4,34 +4,19 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.vtradex.ehub</groupId>
 	<artifactId>ehub-sdk</artifactId>
-	<version>1.1.9-SNAPSHOT</version>
+	<version>1.2.0-SNAPSHOT</version>
 	<properties>
 		<maven.test.skip>true</maven.test.skip>
 	</properties>
 	<dependencies>
 		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-context</artifactId>
-			<version>4.2.5.RELEASE</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
 			<groupId>com.chopsticks.sdk</groupId>
 			<artifactId>chopsticks-core-rocketmq-modern</artifactId>
-			<version>1.1.9-SNAPSHOT</version>
+			<version>1.2.0-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
-					<encoding>UTF-8</encoding>
-				</configuration>
-			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -52,12 +37,35 @@
 						</goals>
 					</execution>
 				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>org.mockito</groupId>
+						<artifactId>mockito-core</artifactId>
+						<version>2.6.3</version>
+					</dependency>
+				</dependencies>
 				<configuration>
+					<minimizeJar>true</minimizeJar>
+					<!-- 打包到中央仓库是否保留原始包 -->
+					<shadedArtifactAttached>false</shadedArtifactAttached>
+					<createDependencyReducedPom>true</createDependencyReducedPom>
+					<filters>
+						<filter>
+							<artifact>*:*</artifact>
+							<excludes>
+								<exclude>META-INF/*.SF</exclude>
+								<exclude>META-INF/*.DSA</exclude>
+								<exclude>META-INF/*.RSA</exclude>
+							</excludes>
+						</filter>
+					</filters>
 					<artifactSet>
 						<excludes>
 							<exclude>org.slf4j:slf4j-api</exclude>
+							<exclude>org.slf4j:slf4j-api</exclude>
 							<exclude>ch.qos.logback:logback-core</exclude>
 							<exclude>ch.qos.logback:logback-classic</exclude>
+							<exclude>javassist:javassist</exclude>
 						</excludes>
 					</artifactSet>
 					<relocations>
@@ -95,7 +103,7 @@
 					</relocations>
 				</configuration>
 			</plugin>
-			<!-- 
+			<!-- doc -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
@@ -114,33 +122,14 @@
 					</execution>
 				</executions>
 			</plugin>
-			 -->
-			<!-- 
-			<plugin>
-				<groupId>com.github.wvengen</groupId>
-				<artifactId>proguard-maven-plugin</artifactId>
-				<version>2.0.14</version>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>proguard</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<obfuscate>true</obfuscate>
-					<attach>true</attach>
-					<attachArtifactClassifier></attachArtifactClassifier>
-					<proguardInclude>${basedir}/proguard.conf</proguardInclude>
-					<libs>
-						<lib>${java.home}/lib/rt.jar</lib>
-						<lib>${java.home}/lib/jsse.jar</lib>
-					</libs>
-					<addMavenDescriptor>false</addMavenDescriptor>
-				</configuration>
-			</plugin>
-			 -->
+			<!-- proguard -->
+			<!-- <plugin> <groupId>com.github.wvengen</groupId> <artifactId>proguard-maven-plugin</artifactId> 
+				<version>2.0.14</version> <executions> <execution> <phase>package</phase> 
+				<goals> <goal>proguard</goal> </goals> </execution> </executions> <configuration> 
+				<obfuscate>true</obfuscate> <attach>true</attach> <attachArtifactClassifier></attachArtifactClassifier> 
+				<proguardInclude>${basedir}/proguard.conf</proguardInclude> <libs> <lib>${java.home}/lib/rt.jar</lib> 
+				<lib>${java.home}/lib/jsse.jar</lib> </libs> <addMavenDescriptor>false</addMavenDescriptor> 
+				</configuration> </plugin> -->
 		</plugins>
 	</build>
 	<distributionManagement>

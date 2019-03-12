@@ -2,10 +2,10 @@ package com.vtradex.ehub.sdk.caller;
 
 import java.lang.reflect.Method;
 
+import com.chopsticks.common.concurrent.Promise;
+import com.chopsticks.common.concurrent.PromiseListener;
 import com.chopsticks.core.caller.InvokeResult;
 import com.chopsticks.core.caller.NoticeResult;
-import com.chopsticks.core.concurrent.Promise;
-import com.chopsticks.core.concurrent.PromiseListener;
 import com.chopsticks.core.rocketmq.DefaultClient;
 import com.chopsticks.core.rocketmq.caller.BaseInvokeResult;
 import com.chopsticks.core.rocketmq.caller.BaseNoticeResult;

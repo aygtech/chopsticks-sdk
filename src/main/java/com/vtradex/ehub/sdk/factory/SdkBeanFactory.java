@@ -23,8 +23,8 @@ public class SdkBeanFactory {
 		return client.getSdkExtBean(clazz);
 	}
 	
-	public static <T> T getBean(DefaultSdkClient client, Class<T> clazz) {
-		return client.getBean(clazz);
+	public static <T> T getSdkBean(DefaultSdkClient client, Class<T> clazz) {
+		return client.getSdkBean(clazz);
 	}
 	
 	

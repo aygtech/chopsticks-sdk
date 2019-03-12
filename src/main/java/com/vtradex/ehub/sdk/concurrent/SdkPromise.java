@@ -3,8 +3,8 @@ package com.vtradex.ehub.sdk.concurrent;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
-import com.chopsticks.core.concurrent.PromiseListener;
-import com.chopsticks.core.concurrent.impl.DefaultTimeoutPromise;
+import com.chopsticks.common.concurrent.PromiseListener;
+import com.chopsticks.common.concurrent.impl.DefaultTimeoutPromise;
 
 /**
  * 通用异步保证，可自定义执行线程，支持自动超时通知

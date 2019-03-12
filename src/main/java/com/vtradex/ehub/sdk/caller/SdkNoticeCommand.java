@@ -15,4 +15,16 @@ public class SdkNoticeCommand extends DefaultModernNoticeCommand {
 	public SdkNoticeCommand setUnikey(String uniKey) {
 		return addExtParam(DefaultSdkClient.UNI_KEY, uniKey);
 	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public SdkNoticeCommand addExtParam(String key, String value) {
+		return super.addExtParam(key, value);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public SdkNoticeCommand addTraceNo(String traceNo) {
+		return super.addTraceNo(traceNo);
+	}
 }

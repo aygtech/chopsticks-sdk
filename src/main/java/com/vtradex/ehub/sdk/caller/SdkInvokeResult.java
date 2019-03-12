@@ -26,4 +26,5 @@ public class SdkInvokeResult extends BaseInvokeResult {
 	public byte[] getBody() {
 		return result.getBody();
 	}
+	
 }
