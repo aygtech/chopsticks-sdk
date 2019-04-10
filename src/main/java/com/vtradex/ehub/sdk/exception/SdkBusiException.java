@@ -16,11 +16,6 @@ public class SdkBusiException extends SdkException {
 		setCode(BUSI_EXCEPTION);
 	}
 
-	public SdkBusiException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-		super(message, cause, enableSuppression, writableStackTrace);
-		setCode(BUSI_EXCEPTION);
-	}
-
 	public SdkBusiException(String message, Throwable cause) {
 		super(message, cause);
 		setCode(BUSI_EXCEPTION);
@@ -42,6 +37,10 @@ public class SdkBusiException extends SdkException {
 			throw new SdkBusiException("busiException code must >= 400000");
 		}
 		return (SdkBusiException)super.setCode(code);
+	}
+
+	public SdkBusiException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+		super(message, cause, enableSuppression, writableStackTrace);
 	}
 	
 }

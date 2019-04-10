@@ -19,7 +19,7 @@ public class SdkPromise<V> extends DefaultTimeoutPromise<V> {
 	}
 	
 	/**
-	 * 设置默认超时通知
+	 *	设置默认超时通知
 	 * @param timeout 超时时间
 	 * @param timeoutUnit 超时单位
 	 */
@@ -43,7 +43,7 @@ public class SdkPromise<V> extends DefaultTimeoutPromise<V> {
 	 * 添加完成监听，默认执行监听线程池为 Executors.newCachedThreadPool()
 	 * @param listener 监听
 	 */
-	public void addListener(SdkListener<? super V> listener) {
+	public void addSdkListener(SdkListener<? super V> listener) {
 		super.addListener(listener);
 	}
 	
@@ -52,7 +52,7 @@ public class SdkPromise<V> extends DefaultTimeoutPromise<V> {
 	 * @param listener 监听
 	 * @param executor 执行线程池
 	 */
-	public void addListener(SdkListener<? super V> listener, Executor executor) {
+	public void addSdkListener(SdkListener<? super V> listener, Executor executor) {
 		super.addListener(listener, executor);
 	}
 }

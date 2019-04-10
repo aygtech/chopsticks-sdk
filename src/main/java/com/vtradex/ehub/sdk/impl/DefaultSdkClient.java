@@ -19,6 +19,7 @@ import com.vtradex.ehub.sdk.caller.SdkExtBeanProxy;
 import com.vtradex.ehub.sdk.caller.SdkNoticeBean;
 import com.vtradex.ehub.sdk.caller.SdkNoticeBeanProxy;
 import com.vtradex.ehub.sdk.exception.SdkException;
+import com.vtradex.ehub.sdk.http.SdkHttpClient;
 
 /**
  * 默认客户端实现
@@ -35,6 +36,9 @@ public class DefaultSdkClient implements SdkClient{
 	
 	public static final String ORG_KEY = "_ORG_KEY_";
 	public static final String UNI_KEY = "_UNI_KEY_";
+	
+	@SuppressWarnings("unused")
+	private SdkHttpClient sdkHttpClient = new SdkHttpClient();
 	
 	static {
 		System.setProperty("rocketmq.namesrv.domain", "ehub.server.com:18080");
@@ -279,9 +283,11 @@ public class DefaultSdkClient implements SdkClient{
 	 */
 	public void setServerPath(String serverPath) {
 		if(!Strings.isNullOrEmpty(serverPath)) {
+			serverPath = serverPath.replace("http://", "").replace("https://", "");
 			if(!serverPath.contains(":")) {
 				throw new SdkException("server path must set port").setCode(SdkException.SERVER_PATH_NOT_PORT);
 			}else {
+				
 				System.setProperty("rocketmq.namesrv.domain", serverPath);
 			}
 		}
@@ -345,5 +351,4 @@ public class DefaultSdkClient implements SdkClient{
 	public void setOrderedNoticeBeginExecutableTime(long orderedNoticeBeginExecutableTime) {
 		innerClient.setOrderedNoticeBeginExecutableTime(orderedNoticeBeginExecutableTime);
 	}
-	
 }
