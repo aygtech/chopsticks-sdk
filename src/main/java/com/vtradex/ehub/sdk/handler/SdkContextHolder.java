@@ -5,6 +5,7 @@ import com.chopsticks.core.rocketmq.modern.handler.ModernContextHolder;
 import com.vtradex.ehub.sdk.impl.DefaultSdkClient;
 
 public class SdkContextHolder extends ModernContextHolder {
+	
 	private SdkContextHolder() {}
 	
 	public static String getOrgKey(){

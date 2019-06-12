@@ -6,15 +6,15 @@ import com.chopsticks.common.concurrent.Promise;
 import com.chopsticks.common.concurrent.PromiseListener;
 import com.chopsticks.core.caller.InvokeResult;
 import com.chopsticks.core.caller.NoticeResult;
-import com.chopsticks.core.rocketmq.DefaultClient;
 import com.chopsticks.core.rocketmq.caller.BaseInvokeResult;
 import com.chopsticks.core.rocketmq.caller.BaseNoticeResult;
+import com.chopsticks.core.rocketmq.modern.DefaultModernClient;
 import com.chopsticks.core.rocketmq.modern.caller.ExtBeanProxy;
 import com.vtradex.ehub.sdk.concurrent.SdkPromise;
 
 public class SdkExtBeanProxy extends ExtBeanProxy{
 
-	public SdkExtBeanProxy(String clazzName, DefaultClient client) {
+	public SdkExtBeanProxy(String clazzName, DefaultModernClient client) {
 		super(clazzName, client);
 	}
 	

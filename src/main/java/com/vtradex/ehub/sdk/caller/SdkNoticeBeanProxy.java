@@ -3,8 +3,8 @@ package com.vtradex.ehub.sdk.caller;
 
 import java.lang.reflect.Method;
 
-import com.chopsticks.core.rocketmq.DefaultClient;
 import com.chopsticks.core.rocketmq.caller.BaseNoticeResult;
+import com.chopsticks.core.rocketmq.modern.DefaultModernClient;
 import com.chopsticks.core.rocketmq.modern.caller.NoticeBeanProxy;
 
 public class SdkNoticeBeanProxy extends NoticeBeanProxy {
@@ -13,7 +13,7 @@ public class SdkNoticeBeanProxy extends NoticeBeanProxy {
 	
 //	private static final long MIN_DELAY_MLLLIS = TimeUnit.SECONDS.toMillis(10L);
 
-	public SdkNoticeBeanProxy(Class<?> clazz, DefaultClient client) {
+	public SdkNoticeBeanProxy(Class<?> clazz, DefaultModernClient client) {
 		super(clazz, client);
 	}
 

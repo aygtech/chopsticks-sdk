@@ -4,10 +4,10 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.vtradex.ehub</groupId>
 	<artifactId>ehub-sdk</artifactId>
-	<version>1.2.1-SNAPSHOT</version>
+	<version>1.2.2-SNAPSHOT</version>
 	<properties>
 		<maven.test.skip>true</maven.test.skip>
-		<chopsticks.version>1.2.1-SNAPSHOT</chopsticks.version>
+		<chopsticks.version>1.2.2-SNAPSHOT</chopsticks.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -61,7 +61,6 @@
 					<artifactSet>
 						<excludes>
 							<exclude>org.slf4j:slf4j-api</exclude>
-							<exclude>org.slf4j:slf4j-api</exclude>
 							<exclude>ch.qos.logback:logback-core</exclude>
 							<exclude>ch.qos.logback:logback-classic</exclude>
 							<exclude>javassist:javassist</exclude>
@@ -103,7 +102,7 @@
 				</configuration>
 			</plugin>
 			<!-- doc -->
-			<!-- <plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<configuration>
@@ -120,15 +119,33 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin> -->
-			<!-- proguard -->
-			<!-- <plugin> <groupId>com.github.wvengen</groupId> <artifactId>proguard-maven-plugin</artifactId> 
-				<version>2.0.14</version> <executions> <execution> <phase>package</phase> 
-				<goals> <goal>proguard</goal> </goals> </execution> </executions> <configuration> 
-				<obfuscate>true</obfuscate> <attach>true</attach> <attachArtifactClassifier></attachArtifactClassifier> 
-				<proguardInclude>${basedir}/proguard.conf</proguardInclude> <libs> <lib>${java.home}/lib/rt.jar</lib> 
-				<lib>${java.home}/lib/jsse.jar</lib> </libs> <addMavenDescriptor>false</addMavenDescriptor> 
-				</configuration> </plugin> -->
+			</plugin>
+			<!-- proguard 
+			<plugin>
+				<groupId>com.github.wvengen</groupId>
+				<artifactId>proguard-maven-plugin</artifactId>
+				<version>2.0.14</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>proguard</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<obfuscate>true</obfuscate>
+					<attach>true</attach>
+					<attachArtifactClassifier></attachArtifactClassifier>
+					<proguardInclude>${basedir}/proguard.conf</proguardInclude>
+					<libs>
+						<lib>${java.home}/lib/rt.jar</lib>
+						<lib>${java.home}/lib/jsse.jar</lib>
+					</libs>
+					<addMavenDescriptor>false</addMavenDescriptor>
+				</configuration>
+			</plugin>
+			-->
 		</plugins>
 	</build>
 	<distributionManagement>

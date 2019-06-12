@@ -8,11 +8,11 @@ import org.apache.rocketmq.client.log.ClientLogger;
 
 import com.chopsticks.core.modern.caller.ExtBean;
 import com.chopsticks.core.modern.caller.NoticeBean;
-import com.chopsticks.core.rocketmq.DefaultClient;
 import com.chopsticks.core.rocketmq.modern.DefaultModernClient;
 import com.chopsticks.core.rocketmq.modern.caller.BaseProxy;
 import com.google.common.base.Strings;
 import com.vtradex.ehub.sdk.SdkClient;
+import com.vtradex.ehub.sdk.SdkClientProxy;
 import com.vtradex.ehub.sdk.caller.SdkBeanProxy;
 import com.vtradex.ehub.sdk.caller.SdkExtBean;
 import com.vtradex.ehub.sdk.caller.SdkExtBeanProxy;
@@ -70,7 +70,7 @@ public class DefaultSdkClient implements SdkClient{
 	private DefaultModernClient buildInnerClient(String groupName) {
 		DefaultModernClient innerClient = new DefaultModernClient(groupName) {
 			@Override
-			protected BaseProxy getBeanProxy(Class<?> clazz, DefaultClient client) {
+			protected BaseProxy getBeanProxy(Class<?> clazz, DefaultModernClient client) {
 				BaseProxy proxy = new SdkBeanProxy(clazz, client);
 				Map<String, String> extParams = proxy.getExtParams();
 				extParams.put(ORG_KEY, getOrgKey());
@@ -82,7 +82,7 @@ public class DefaultSdkClient implements SdkClient{
 				return SdkNoticeBean.class;
 			}
 			@Override
-			protected BaseProxy getNoticeBeanProxy(Class<?> clazz, DefaultClient client) {
+			protected BaseProxy getNoticeBeanProxy(Class<?> clazz, DefaultModernClient client) {
 				BaseProxy proxy = new SdkNoticeBeanProxy(clazz, client);
 				Map<String, String> extParams = proxy.getExtParams();
 				extParams.put(ORG_KEY, getOrgKey());
@@ -94,7 +94,7 @@ public class DefaultSdkClient implements SdkClient{
 				return SdkExtBean.class;
 			}
 			@Override
-			protected BaseProxy getExtBeanProxy(String clazzName, DefaultClient client) {
+			protected BaseProxy getExtBeanProxy(String clazzName, DefaultModernClient client) {
 				BaseProxy proxy = new SdkExtBeanProxy(clazzName, client);
 				Map<String, String> extParams = proxy.getExtParams();
 				extParams.put(ORG_KEY, getOrgKey());
@@ -350,5 +350,9 @@ public class DefaultSdkClient implements SdkClient{
 	 */
 	public void setOrderedNoticeBeginExecutableTime(long orderedNoticeBeginExecutableTime) {
 		innerClient.setOrderedNoticeBeginExecutableTime(orderedNoticeBeginExecutableTime);
+	}
+	
+	public void setClientProxy(SdkClientProxy clientProxy) {
+		innerClient.setModernClientProxy(clientProxy);
 	}
 }
