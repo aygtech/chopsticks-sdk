@@ -1,0 +1,55 @@
+# 不预校验
+-dontpreverify
+# 忽略警告 
+-ignorewarnings
+#打印处理信息，失败时会打印堆栈信息
+-verbose
+
+# 保持目录结构 
+#-keepdirectories
+#不能混淆泛型、抛出的异常、注解默认值、原始行号等
+-keepattributes Signature,Exceptions,*Annotation*,InnerClasses,Deprecated,EnclosingMethod
+# 对于包名、类名不进行混淆
+#-keeppackagenames com.company.appname.**
+
+# 保留public、protected方法不被混淆
+-keep public class * { 
+      public protected *; 
+}
+# 保留注解不被混淆
+-keep public @interface * {
+    ** default (*);
+}
+
+# 保留枚举类不被混淆
+-keepclassmembers enum * {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}
+
+# 保持依赖注入不被混淆
+-keepclassmembers class * {
+    @org.springframework.beans.factory.annotation.Autowired *;
+    @javax.annotation.Resource *;
+}
+
+# 保持RMI调用不被混淆
+-keep class * implements java.rmi.Remote { 
+    <init>(java.rmi.activation.ActivationID, java.rmi.MarshalledObject); 
+}
+
+#-keep class com.vtradex.ehub.plugins.** {*;}
+
+# 保留JavaBean不被混淆
+-keepclassmembers class * implements java.io.Serializable { 
+    static final long serialVersionUID; 
+    private static final java.io.ObjectStreamField[] serialPersistentFields; 
+    private void writeObject(java.io.ObjectOutputStream); 
+    private void readObject(java.io.ObjectInputStream); 
+    java.lang.Object writeReplace(); 
+    java.lang.Object readResolve(); 
+}
+
+
+# 避免类名被标记为final
+#-optimizations !class/marking/final

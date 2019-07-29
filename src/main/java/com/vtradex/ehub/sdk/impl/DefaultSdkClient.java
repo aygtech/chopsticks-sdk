@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.apache.rocketmq.client.log.ClientLogger;
 
+import com.chopsticks.common.utils.Reflect;
 import com.chopsticks.core.modern.caller.ExtBean;
 import com.chopsticks.core.modern.caller.NoticeBean;
 import com.chopsticks.core.rocketmq.modern.DefaultModernClient;
@@ -177,6 +178,9 @@ public class DefaultSdkClient implements SdkClient{
 	public void setServices(Map<Class<?>, Object> services){
 		innerClient.register(services);
 	}
+	protected Map<Class<?>, Object> getServices(){
+		return Reflect.on(innerClient).field("handlers").get();
+	}
 	@Override
 	public synchronized void start() {
 		innerClient.start();
@@ -202,7 +206,7 @@ public class DefaultSdkClient implements SdkClient{
 		innerClient.setNoticeExecutable(noticeExecutable);
 	}
 	/**
-	 * 设置延迟执行的线程数，默认 10
+	 * 设置无序异步执行的线程数，默认 10
 	 * @param noticeExecutableNum 执行线程数
 	 */
 	public void setNoticeExecutableNum(int noticeExecutableNum) {
@@ -352,6 +356,10 @@ public class DefaultSdkClient implements SdkClient{
 		innerClient.setOrderedNoticeBeginExecutableTime(orderedNoticeBeginExecutableTime);
 	}
 	
+	/**
+	 * 设置代理类
+	 * @param clientProxy
+	 */
 	public void setClientProxy(SdkClientProxy clientProxy) {
 		innerClient.setModernClientProxy(clientProxy);
 	}
