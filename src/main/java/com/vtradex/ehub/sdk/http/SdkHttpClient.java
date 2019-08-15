@@ -1,5 +1,6 @@
 package com.vtradex.ehub.sdk.http;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.chopsticks.common.concurrent.Promise;
@@ -24,7 +25,7 @@ public class SdkHttpClient extends HttpClient{
 		}
 	}
 	public SdkPromise<SdkHttpResponse> sdkAsyncInvoke(SdkHttpRequest req) {
-		final SdkPromise<SdkHttpResponse> ret = new SdkPromise<SdkHttpResponse>();
+		final SdkPromise<SdkHttpResponse> ret = new SdkPromise<SdkHttpResponse>(req.getConnTimeoutMillis() + req.getReadTimeoutMillis(), TimeUnit.MILLISECONDS);
 		asyncInvoke(req).addListener(new PromiseListener<HttpResponse>() {
 			@Override
 			public void onFailure(Throwable t) {

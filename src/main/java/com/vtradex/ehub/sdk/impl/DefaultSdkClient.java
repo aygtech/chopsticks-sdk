@@ -4,7 +4,11 @@ package com.vtradex.ehub.sdk.impl;
 import java.io.File;
 import java.util.Map;
 
+import org.apache.rocketmq.client.ClientConfig;
+import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.log.ClientLogger;
+import org.apache.rocketmq.client.producer.DefaultMQProducer;
+import org.apache.rocketmq.tools.admin.DefaultMQAdminExt;
 
 import com.chopsticks.common.utils.Reflect;
 import com.chopsticks.core.modern.caller.ExtBean;
@@ -102,8 +106,108 @@ public class DefaultSdkClient implements SdkClient{
 				extParams.put(UNI_KEY, getUniKey());
 				return proxy;
 			}
+			@Override
+			protected void beforeProducerStart(DefaultMQProducer producer) {
+				auth(producer);
+				super.beforeProducerStart(producer);
+			}
+			@Override
+			protected void beforeAdminExtStart(DefaultMQAdminExt mqAdminExt) {
+				auth(mqAdminExt);
+				super.beforeAdminExtStart(mqAdminExt);
+			}
+			@Override
+			protected void beforeCallerInvokeConsumerStart(DefaultMQPushConsumer callerInvokeConsumer) {
+				auth(callerInvokeConsumer);
+				super.beforeCallerInvokeConsumerStart(callerInvokeConsumer);
+			}
+			@Override
+			protected void beforeDelayNoticeConsumerStart(DefaultMQPushConsumer delayNoticeConsumer) {
+				auth(delayNoticeConsumer);
+				super.beforeDelayNoticeConsumerStart(delayNoticeConsumer);
+			}
+			@Override
+			protected void beforeInvokeConsumerStart(DefaultMQPushConsumer invokeConsumer) {
+				auth(invokeConsumer);
+				super.beforeInvokeConsumerStart(invokeConsumer);
+			}
+			@Override
+			protected void beforeNoticeConsumerStart(DefaultMQPushConsumer noticeConsumer) {
+				auth(noticeConsumer);
+				super.beforeNoticeConsumerStart(noticeConsumer);
+			}
+			@Override
+			protected void beforeOrderedNoticeConsumerStart(DefaultMQPushConsumer orderedNoticeConsumer) {
+				auth(orderedNoticeConsumer);
+				super.beforeOrderedNoticeConsumerStart(orderedNoticeConsumer);
+			}
+			private String prefix = getPrefix();
+			private void auth(ClientConfig cfg) {
+				if(!Strings.isNullOrEmpty(accessKey) && !Strings.isNullOrEmpty(secretKey)) {
+					try {
+						String aclClientRPCHook = prefix + ".acl.common.AclClientRPCHook";
+						String sessionCredentials = prefix + ".acl.common.SessionCredentials";
+						String defaultMQAdminExt = prefix + ".tools.admin.DefaultMQAdminExt";
+						String defaultMQPushConsumer = prefix + ".client.consumer.DefaultMQPushConsumer";
+						String defaultMQProducer = prefix + ".client.producer.DefaultMQProducer";
+						String accessChannel = prefix + ".client.AccessChannel";
+						Object cloud = null;
+						if(onsSupport) {
+							for(Object obj : Class.forName(accessChannel).getEnumConstants()) {
+								if("CLOUD".equals(obj.toString())) {
+									cloud = obj;
+									break;
+								}
+							}
+							String newGroup;
+							if(cfg instanceof DefaultMQPushConsumer) {
+								newGroup = "GID_" + ((DefaultMQPushConsumer)cfg).getConsumerGroup();
+								((DefaultMQPushConsumer)cfg).setConsumerGroup(newGroup);
+							}else if(cfg instanceof DefaultMQProducer) {
+								newGroup = "GID_" + ((DefaultMQProducer)cfg).getProducerGroup();
+								((DefaultMQProducer)cfg).setProducerGroup(newGroup);
+							}else if(cfg instanceof DefaultMQAdminExt) {
+								newGroup = "GID_" + ((DefaultMQAdminExt)cfg).getAdminExtGroup();
+								((DefaultMQAdminExt)cfg).setAdminExtGroup(newGroup);
+								
+							}
+						}
+						Object rpcHook = Reflect.on(aclClientRPCHook)
+												.create(Reflect.on(sessionCredentials)
+															   .create(accessKey, secretKey).get()
+												).get();
+						Reflect.on(cfg).set("accessChannel", cloud);
+						String name = cfg.getClass().getName();
+						if(name.equals(defaultMQAdminExt)) {
+							Reflect.on(cfg).field("defaultMQAdminExtImpl").set("rpcHook", rpcHook);
+						}else if(name.equals(defaultMQPushConsumer)) {
+							Reflect.on(cfg).field("defaultMQPushConsumerImpl").set("rpcHook", rpcHook);
+						}else if(name.equals(defaultMQProducer)) {
+							Reflect.on(cfg).field("defaultMQProducerImpl").set("rpcHook", rpcHook);
+						}
+					}catch (Throwable e) {
+						throw new SdkException("auth fail", e);
+					}
+					
+				}
+			}
+			
+			private String getPrefix() {
+				String prefix = "org.apache.rocketmq";
+				String fullName = DefaultMQPushConsumer.class.getName();
+				prefix = fullName.substring(0, fullName.indexOf(prefix) + prefix.length());
+				return prefix;
+			}
 		};
 		return innerClient;
+	}
+	private String accessKey;
+	private String secretKey;
+	private boolean onsSupport;
+	public void onsSupport(String accessKey, String secretKey) {
+		this.accessKey = accessKey;
+		this.secretKey = secretKey;
+		this.onsSupport = true;
 	}
 	/**
 	 * 废弃，版本变更会直接删除
@@ -183,6 +287,9 @@ public class DefaultSdkClient implements SdkClient{
 	}
 	@Override
 	public synchronized void start() {
+		if(onsSupport) {
+			innerClient.setMqAdminExtSupport(false);
+		}
 		innerClient.start();
 		started = true;
 	}
@@ -291,10 +398,12 @@ public class DefaultSdkClient implements SdkClient{
 			if(!serverPath.contains(":")) {
 				throw new SdkException("server path must set port").setCode(SdkException.SERVER_PATH_NOT_PORT);
 			}else {
-				
 				System.setProperty("rocketmq.namesrv.domain", serverPath);
 			}
 		}
+	}
+	public void setNamesrvAddr(String namesrvAddr) {
+		innerClient.setNamesrvAddr(namesrvAddr);
 	}
 	/**
 	 * 设置异步执行失败重试次数, 默认都是 Integer.MAX_VALUE
@@ -358,7 +467,7 @@ public class DefaultSdkClient implements SdkClient{
 	
 	/**
 	 * 设置代理类
-	 * @param clientProxy
+	 * @param clientProxy 代理客户端
 	 */
 	public void setClientProxy(SdkClientProxy clientProxy) {
 		innerClient.setModernClientProxy(clientProxy);
