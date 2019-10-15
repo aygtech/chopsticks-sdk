@@ -9,6 +9,8 @@ import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.log.ClientLogger;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.tools.admin.DefaultMQAdminExt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.chopsticks.common.utils.Reflect;
 import com.chopsticks.core.modern.caller.ExtBean;
@@ -32,6 +34,8 @@ import com.vtradex.ehub.sdk.http.SdkHttpClient;
  *
  */
 public class DefaultSdkClient implements SdkClient{
+	
+	private static final Logger log = LoggerFactory.getLogger(DefaultSdkClient.class);
 	
 	private String orgKey;
 	private String uniKey;
@@ -287,16 +291,24 @@ public class DefaultSdkClient implements SdkClient{
 	}
 	@Override
 	public synchronized void start() {
-		if(onsSupport) {
-			innerClient.setMqAdminExtSupport(false);
+		if(!started) {
+			if(onsSupport) {
+				innerClient.setMqAdminExtSupport(false);
+			}
+			innerClient.start();
+			started = true;
+		}else {
+			log.warn("group : {} is started", innerClient.getGroupName());
 		}
-		innerClient.start();
-		started = true;
 	}
 	@Override
 	public synchronized void shutdown() {
-		innerClient.shutdown();
-		started = false;
+		if(started) {
+			innerClient.shutdown();
+			started = false;
+		}else {
+			log.warn("group : {} is not start", innerClient.getGroupName());
+		}
 	}
 	/**
 	 * 获取客户端启动状态
