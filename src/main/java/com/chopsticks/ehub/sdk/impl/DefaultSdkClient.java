@@ -46,6 +46,149 @@ import com.google.common.cache.CacheBuilder;
  */
 public class DefaultSdkClient implements SdkClient{
 	
+	private final class InnerSdkClient extends DefaultModernClient {
+		private String prefix = getPrefix();
+
+		private InnerSdkClient(String groupName) {
+			super(groupName);
+		}
+
+		@Override
+		protected BaseProxy getBeanProxy(Class<?> clazz, DefaultModernClient client) {
+			BaseProxy proxy = new SdkBeanProxy(clazz, client);
+			Map<String, String> extParams = proxy.getExtParams();
+			extParams.put(ORG_KEY, getOrgKey());
+			extParams.put(UNI_KEY, getUniKey());
+			return proxy;
+		}
+
+		@Override
+		protected Class<? extends NoticeBean> getNoticeBeanClazz() {
+			return SdkNoticeBean.class;
+		}
+
+		@Override
+		protected BaseProxy getNoticeBeanProxy(Class<?> clazz, DefaultModernClient client) {
+			BaseProxy proxy = new SdkNoticeBeanProxy(clazz, client);
+			Map<String, String> extParams = proxy.getExtParams();
+			extParams.put(ORG_KEY, getOrgKey());
+			extParams.put(UNI_KEY, getUniKey());
+			return proxy;
+		}
+
+		@Override
+		protected Class<? extends ExtBean> getExtBeanClazz() {
+			return SdkExtBean.class;
+		}
+
+		@Override
+		protected BaseProxy getExtBeanProxy(String clazzName, DefaultModernClient client) {
+			BaseProxy proxy = new SdkExtBeanProxy(clazzName, client);
+			Map<String, String> extParams = proxy.getExtParams();
+			extParams.put(ORG_KEY, getOrgKey());
+			extParams.put(UNI_KEY, getUniKey());
+			return proxy;
+		}
+
+		@Override
+		protected void beforeProducerStart(DefaultMQProducer producer) {
+			auth(producer);
+			super.beforeProducerStart(producer);
+		}
+
+		@Override
+		protected void beforeAdminExtStart(DefaultMQAdminExt mqAdminExt) {
+			auth(mqAdminExt);
+			super.beforeAdminExtStart(mqAdminExt);
+		}
+
+		@Override
+		protected void beforeCallerInvokeConsumerStart(DefaultMQPushConsumer callerInvokeConsumer) {
+			auth(callerInvokeConsumer);
+			super.beforeCallerInvokeConsumerStart(callerInvokeConsumer);
+		}
+
+		@Override
+		protected void beforeDelayNoticeConsumerStart(DefaultMQPushConsumer delayNoticeConsumer) {
+			auth(delayNoticeConsumer);
+			super.beforeDelayNoticeConsumerStart(delayNoticeConsumer);
+		}
+
+		@Override
+		protected void beforeInvokeConsumerStart(DefaultMQPushConsumer invokeConsumer) {
+			auth(invokeConsumer);
+			super.beforeInvokeConsumerStart(invokeConsumer);
+		}
+
+		@Override
+		protected void beforeNoticeConsumerStart(DefaultMQPushConsumer noticeConsumer) {
+			auth(noticeConsumer);
+			super.beforeNoticeConsumerStart(noticeConsumer);
+		}
+
+		@Override
+		protected void beforeOrderedNoticeConsumerStart(DefaultMQPushConsumer orderedNoticeConsumer) {
+			auth(orderedNoticeConsumer);
+			super.beforeOrderedNoticeConsumerStart(orderedNoticeConsumer);
+		}
+
+		private void auth(ClientConfig cfg) {
+			if(!Strings.isNullOrEmpty(accessKey) && !Strings.isNullOrEmpty(secretKey)) {
+				try {
+					String aclClientRPCHook = prefix + ".acl.common.AclClientRPCHook";
+					String sessionCredentials = prefix + ".acl.common.SessionCredentials";
+					String defaultMQAdminExt = prefix + ".tools.admin.DefaultMQAdminExt";
+					String defaultMQPushConsumer = prefix + ".client.consumer.DefaultMQPushConsumer";
+					String defaultMQProducer = prefix + ".client.producer.DefaultMQProducer";
+					String accessChannel = prefix + ".client.AccessChannel";
+					Object cloud = null;
+					if(onsSupport) {
+						for(Object obj : Class.forName(accessChannel).getEnumConstants()) {
+							if("CLOUD".equals(obj.toString())) {
+								cloud = obj;
+								break;
+							}
+						}
+						String newGroup;
+						if(cfg instanceof DefaultMQPushConsumer) {
+							newGroup = "GID_" + ((DefaultMQPushConsumer)cfg).getConsumerGroup();
+							((DefaultMQPushConsumer)cfg).setConsumerGroup(newGroup);
+						}else if(cfg instanceof DefaultMQProducer) {
+							newGroup = "GID_" + ((DefaultMQProducer)cfg).getProducerGroup();
+							((DefaultMQProducer)cfg).setProducerGroup(newGroup);
+						}else if(cfg instanceof DefaultMQAdminExt) {
+							newGroup = "GID_" + ((DefaultMQAdminExt)cfg).getAdminExtGroup();
+							((DefaultMQAdminExt)cfg).setAdminExtGroup(newGroup);
+							
+						}
+					}
+					Object rpcHook = Reflect.on(aclClientRPCHook)
+											.create(Reflect.on(sessionCredentials)
+														   .create(accessKey, secretKey).get()
+											).get();
+					Reflect.on(cfg).set("accessChannel", cloud);
+					String name = cfg.getClass().getName();
+					if(name.equals(defaultMQAdminExt)) {
+						Reflect.on(cfg).field("defaultMQAdminExtImpl").set("rpcHook", rpcHook);
+					}else if(name.equals(defaultMQPushConsumer)) {
+						Reflect.on(cfg).field("defaultMQPushConsumerImpl").set("rpcHook", rpcHook);
+					}else if(name.equals(defaultMQProducer)) {
+						Reflect.on(cfg).field("defaultMQProducerImpl").set("rpcHook", rpcHook);
+					}
+				}catch (Throwable e) {
+					throw new SdkException("auth fail", e);
+				}
+				
+			}
+		}
+
+		private String getPrefix() {
+			String prefix = "org.apache.rocketmq";
+			String fullName = DefaultMQPushConsumer.class.getName();
+			prefix = fullName.substring(0, fullName.indexOf(prefix) + prefix.length());
+			return prefix;
+		}
+	}
 	private static final Logger log = LoggerFactory.getLogger(DefaultSdkClient.class);
 	
 	private String orgKey;
@@ -87,132 +230,7 @@ public class DefaultSdkClient implements SdkClient{
 	}
 	
 	private DefaultModernClient buildInnerClient(String groupName) {
-		DefaultModernClient innerClient = new DefaultModernClient(groupName) {
-			@Override
-			protected BaseProxy getBeanProxy(Class<?> clazz, DefaultModernClient client) {
-				BaseProxy proxy = new SdkBeanProxy(clazz, client);
-				Map<String, String> extParams = proxy.getExtParams();
-				extParams.put(ORG_KEY, getOrgKey());
-				extParams.put(UNI_KEY, getUniKey());
-				return proxy;
-			}
-			@Override
-			protected Class<? extends NoticeBean> getNoticeBeanClazz() {
-				return SdkNoticeBean.class;
-			}
-			@Override
-			protected BaseProxy getNoticeBeanProxy(Class<?> clazz, DefaultModernClient client) {
-				BaseProxy proxy = new SdkNoticeBeanProxy(clazz, client);
-				Map<String, String> extParams = proxy.getExtParams();
-				extParams.put(ORG_KEY, getOrgKey());
-				extParams.put(UNI_KEY, getUniKey());
-				return proxy;
-			}
-			@Override
-			protected Class<? extends ExtBean> getExtBeanClazz() {
-				return SdkExtBean.class;
-			}
-			@Override
-			protected BaseProxy getExtBeanProxy(String clazzName, DefaultModernClient client) {
-				BaseProxy proxy = new SdkExtBeanProxy(clazzName, client);
-				Map<String, String> extParams = proxy.getExtParams();
-				extParams.put(ORG_KEY, getOrgKey());
-				extParams.put(UNI_KEY, getUniKey());
-				return proxy;
-			}
-			@Override
-			protected void beforeProducerStart(DefaultMQProducer producer) {
-				auth(producer);
-				super.beforeProducerStart(producer);
-			}
-			@Override
-			protected void beforeAdminExtStart(DefaultMQAdminExt mqAdminExt) {
-				auth(mqAdminExt);
-				super.beforeAdminExtStart(mqAdminExt);
-			}
-			@Override
-			protected void beforeCallerInvokeConsumerStart(DefaultMQPushConsumer callerInvokeConsumer) {
-				auth(callerInvokeConsumer);
-				super.beforeCallerInvokeConsumerStart(callerInvokeConsumer);
-			}
-			@Override
-			protected void beforeDelayNoticeConsumerStart(DefaultMQPushConsumer delayNoticeConsumer) {
-				auth(delayNoticeConsumer);
-				super.beforeDelayNoticeConsumerStart(delayNoticeConsumer);
-			}
-			@Override
-			protected void beforeInvokeConsumerStart(DefaultMQPushConsumer invokeConsumer) {
-				auth(invokeConsumer);
-				super.beforeInvokeConsumerStart(invokeConsumer);
-			}
-			@Override
-			protected void beforeNoticeConsumerStart(DefaultMQPushConsumer noticeConsumer) {
-				auth(noticeConsumer);
-				super.beforeNoticeConsumerStart(noticeConsumer);
-			}
-			@Override
-			protected void beforeOrderedNoticeConsumerStart(DefaultMQPushConsumer orderedNoticeConsumer) {
-				auth(orderedNoticeConsumer);
-				super.beforeOrderedNoticeConsumerStart(orderedNoticeConsumer);
-			}
-			private String prefix = getPrefix();
-			private void auth(ClientConfig cfg) {
-				if(!Strings.isNullOrEmpty(accessKey) && !Strings.isNullOrEmpty(secretKey)) {
-					try {
-						String aclClientRPCHook = prefix + ".acl.common.AclClientRPCHook";
-						String sessionCredentials = prefix + ".acl.common.SessionCredentials";
-						String defaultMQAdminExt = prefix + ".tools.admin.DefaultMQAdminExt";
-						String defaultMQPushConsumer = prefix + ".client.consumer.DefaultMQPushConsumer";
-						String defaultMQProducer = prefix + ".client.producer.DefaultMQProducer";
-						String accessChannel = prefix + ".client.AccessChannel";
-						Object cloud = null;
-						if(onsSupport) {
-							for(Object obj : Class.forName(accessChannel).getEnumConstants()) {
-								if("CLOUD".equals(obj.toString())) {
-									cloud = obj;
-									break;
-								}
-							}
-							String newGroup;
-							if(cfg instanceof DefaultMQPushConsumer) {
-								newGroup = "GID_" + ((DefaultMQPushConsumer)cfg).getConsumerGroup();
-								((DefaultMQPushConsumer)cfg).setConsumerGroup(newGroup);
-							}else if(cfg instanceof DefaultMQProducer) {
-								newGroup = "GID_" + ((DefaultMQProducer)cfg).getProducerGroup();
-								((DefaultMQProducer)cfg).setProducerGroup(newGroup);
-							}else if(cfg instanceof DefaultMQAdminExt) {
-								newGroup = "GID_" + ((DefaultMQAdminExt)cfg).getAdminExtGroup();
-								((DefaultMQAdminExt)cfg).setAdminExtGroup(newGroup);
-								
-							}
-						}
-						Object rpcHook = Reflect.on(aclClientRPCHook)
-												.create(Reflect.on(sessionCredentials)
-															   .create(accessKey, secretKey).get()
-												).get();
-						Reflect.on(cfg).set("accessChannel", cloud);
-						String name = cfg.getClass().getName();
-						if(name.equals(defaultMQAdminExt)) {
-							Reflect.on(cfg).field("defaultMQAdminExtImpl").set("rpcHook", rpcHook);
-						}else if(name.equals(defaultMQPushConsumer)) {
-							Reflect.on(cfg).field("defaultMQPushConsumerImpl").set("rpcHook", rpcHook);
-						}else if(name.equals(defaultMQProducer)) {
-							Reflect.on(cfg).field("defaultMQProducerImpl").set("rpcHook", rpcHook);
-						}
-					}catch (Throwable e) {
-						throw new SdkException("auth fail", e);
-					}
-					
-				}
-			}
-			
-			private String getPrefix() {
-				String prefix = "org.apache.rocketmq";
-				String fullName = DefaultMQPushConsumer.class.getName();
-				prefix = fullName.substring(0, fullName.indexOf(prefix) + prefix.length());
-				return prefix;
-			}
-		};
+		DefaultModernClient innerClient = new InnerSdkClient(groupName);
 		return innerClient;
 	}
 	private String accessKey;

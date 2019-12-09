@@ -4,6 +4,7 @@ import java.util.Set;
 
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.common.message.MessageConst;
+import org.apache.rocketmq.common.message.MessageExt;
 
 import com.chopsticks.core.rocketmq.caller.BaseNoticeResult;
 import com.google.common.base.Strings;
@@ -31,6 +32,10 @@ public class SdkNoticeResult extends BaseNoticeResult {
 	@Override
 	public SendResult getSendResult() {
 		return result.getSendResult();
+	}
+	@Override
+	public MessageExt getMessageExt() {
+	    return result.getMessageExt();
 	}
 	@Override
 	public String getOriginId() {

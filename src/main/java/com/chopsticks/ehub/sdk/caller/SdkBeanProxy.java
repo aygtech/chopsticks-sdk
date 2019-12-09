@@ -5,7 +5,6 @@ import java.lang.reflect.Method;
 import com.chopsticks.core.rocketmq.modern.DefaultModernClient;
 import com.chopsticks.core.rocketmq.modern.caller.BeanProxy;
 import com.chopsticks.ehub.sdk.SdkClientProxy;
-
 public class SdkBeanProxy extends BeanProxy{
 
 	public SdkBeanProxy(Class<?> clazz, DefaultModernClient client) {

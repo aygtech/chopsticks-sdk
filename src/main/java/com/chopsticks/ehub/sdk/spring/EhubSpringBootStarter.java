@@ -30,7 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 
 
 @Slf4j
-@EnableConfigurationProperties(EhubClientHelper.class)
+@EnableConfigurationProperties(EhubClientHelperStarter.class)
 @ConditionalOnProperty(prefix = "ehub", name = "enable", havingValue = "true")
 public class EhubSpringBootStarter implements EnvironmentAware, BeanFactoryPostProcessor, BeanPostProcessor, ApplicationListener<ContextRefreshedEvent>{
 	
@@ -107,7 +107,7 @@ public class EhubSpringBootStarter implements EnvironmentAware, BeanFactoryPostP
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event) {
 		if(event.getApplicationContext().getParent() == null) {
-			EhubClientHelper ehubClientHelper = event.getApplicationContext().getBean(EhubClientHelper.class);
+		    EhubClientHelperStarter ehubClientHelper = event.getApplicationContext().getBean(EhubClientHelperStarter.class);
 			String sdkCacheKey = env.getProperty("ehub.sdkCache");
 			if(!Strings.isNullOrEmpty(sdkCacheKey)) {
 				SdkCache cache = event.getApplicationContext().getBean(sdkCacheKey, SdkCache.class);

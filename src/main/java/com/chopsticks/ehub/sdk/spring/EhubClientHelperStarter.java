@@ -8,12 +8,12 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
@@ -37,13 +37,8 @@ import lombok.extern.slf4j.Slf4j;
 
 //此为固定的框架代码，业务开发无需考虑
 @Slf4j
-public class EhubClientHelper extends SdkClientProxy implements SdkTransactionChecker, ApplicationContextAware {
-    
-    private ApplicationContext ctx;
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.ctx = applicationContext;
-    }
+@ConfigurationProperties
+public class EhubClientHelperStarter extends SdkClientProxy implements SdkTransactionChecker {
     
     public static final ThreadLocal<String> BIZ_VALUE = new ThreadLocal<String>();
     
@@ -57,15 +52,18 @@ public class EhubClientHelper extends SdkClientProxy implements SdkTransactionCh
 	public SdkCache getCache() {
 		return cache;
 	}
+	@Autowired
+	@Lazy
+	private EhubClientHelperStarter helper;
 	
 	private static final ScheduledExecutorService POOL = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setDaemon(true).setNameFormat("tx-msg-clear").build());
 	@PostConstruct
-	public void post() {
+	public void aaaa() {
 	    POOL.scheduleWithFixedDelay(new Runnable() {
             @Override
             public void run() {
                 try {
-                    ctx.getBean(EhubClientHelper.class).clear();
+                     helper.clear();
                 }catch (Throwable e) {
                     log.error(e.getMessage(), e);
                 }
@@ -174,7 +172,7 @@ public class EhubClientHelper extends SdkClientProxy implements SdkTransactionCh
 		try {
 		    super.noticeExecuteProxy(obj, method, args);
 		}catch (Throwable e) {
-		    log.error("busi error" + e.getMessage() + " : " + BIZ_VALUE.get());
+		    log.error("busi error" + e.getMessage());
 		    throw e;
 		}
 		Date exprie = new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(5L));
@@ -204,7 +202,7 @@ public class EhubClientHelper extends SdkClientProxy implements SdkTransactionCh
 		}catch (Throwable e) {
 			log.error(e.getMessage(), e);
 		}
-		log.info("回查兜底 unknow : {}-{}-{}", id, ret.getMessageExt().getCommitLogOffset(), ret.getMessageExt().getPreparedTransactionOffset());
+		log.info("回查兜底 unknow : {}", id);
 		return SdkTransactionState.UNKNOW;
 	}
 
@@ -215,7 +213,10 @@ public class EhubClientHelper extends SdkClientProxy implements SdkTransactionCh
 		}catch (EmptyResultDataAccessException e) {
 			// 吃掉异常
 		    log.info("select id from message_transaction_event where id = {}", ret.getId());
+		}catch (Throwable e) {
+		    log.error(e.getMessage(), e);
 		}
+		
 		return !Strings.isNullOrEmpty(id);
 	}
 	
