@@ -70,7 +70,7 @@ public class EhubClientHelper extends SdkClientProxy implements SdkTransactionCh
                     log.error(e.getMessage(), e);
                 }
             }
-        }, 0, 5, TimeUnit.MINUTES);
+        }, 30, 30, TimeUnit.SECONDS);
 	}
 	@Transactional
 	public void clear() throws Throwable {
@@ -108,10 +108,10 @@ public class EhubClientHelper extends SdkClientProxy implements SdkTransactionCh
                             client.transactionRollback(ret, null);
                             log.info ("手工回滚 : {}, {}", ret.getId(), BIZ_VALUE.get());
                         }else {
-                            log.info("TransactionSynchronization afterCompletion is unknow : {}", BIZ_VALUE.get());
+                            log.error("TransactionSynchronization afterCompletion is unknow : {}", BIZ_VALUE.get());
                         }
                     } catch(Throwable e) {
-                        log.info("手工事务异常 : " + BIZ_VALUE.get() +  e.getMessage(), e);
+                        log.error("手工事务异常 : " + BIZ_VALUE.get() +  e.getMessage(), e);
                     }
                 }
             });
@@ -164,10 +164,10 @@ public class EhubClientHelper extends SdkClientProxy implements SdkTransactionCh
 		String id = SdkContextHolder.getSdkNoticeContext().getId();
 		try {
 			if(cache.contans(id)) {
-				log.info("id exist : {}", id);
+				log.trace("id exist : {}", id);
 				return;
 			}
-			log.info("cache not get id : {}, cacheClass : {}", id, cache);
+			log.trace("cache not get id : {}, cacheClass : {}", id, cache);
 		}catch (Throwable e) {
 			log.error(e.getMessage(), e);
 		}
@@ -180,7 +180,7 @@ public class EhubClientHelper extends SdkClientProxy implements SdkTransactionCh
 		Date exprie = new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(5L));
 		try {
 			cache.add(id, exprie);
-			log.info("cache set id : {}, cacheClass : {}-{}", id, cache, BIZ_VALUE.get());
+			log.trace("cache set id : {}, cacheClass : {}-{}", id, cache, BIZ_VALUE.get());
 		}catch (Throwable e) {
 			log.error(e.getMessage(), e);
 		}
@@ -198,13 +198,13 @@ public class EhubClientHelper extends SdkClientProxy implements SdkTransactionCh
 		// 根据 id 去兜底查询，看最终是要提交还是未知，业务一般很难确定回滚状态，所以一般只需返回 Commit 和 UNKNOW
 		try {
 			if(checkTransaction(ret)) {
-				log.info("回查兜底 commit : {}", id);
+				log.warn("回查兜底 commit : {}", id);
 				return SdkTransactionState.COMMIT;
 			}
 		}catch (Throwable e) {
 			log.error(e.getMessage(), e);
 		}
-		log.info("回查兜底 unknow : {}-{}-{}", id, ret.getMessageExt().getCommitLogOffset(), ret.getMessageExt().getPreparedTransactionOffset());
+		log.warn("回查兜底 unknow : {}-{}-{}", id, ret.getMessageExt().getCommitLogOffset(), ret.getMessageExt().getPreparedTransactionOffset());
 		return SdkTransactionState.UNKNOW;
 	}
 
@@ -214,7 +214,7 @@ public class EhubClientHelper extends SdkClientProxy implements SdkTransactionCh
 			id = jdbcTemplate.queryForObject("select id from message_transaction_event where id = ?", new Object[] {ret.getId()}, String.class);
 		}catch (EmptyResultDataAccessException e) {
 			// 吃掉异常
-		    log.info("select id from message_transaction_event where id = {}", ret.getId());
+		    log.trace("select id from message_transaction_event where id = {}", ret.getId());
 		}
 		return !Strings.isNullOrEmpty(id);
 	}
