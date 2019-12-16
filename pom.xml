@@ -4,10 +4,10 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.chopsticks.ehub</groupId>
 	<artifactId>ehub-sdk</artifactId>
-	<version>1.2.8-SNAPSHOT</version>
+	<version>1.2.9-SNAPSHOT</version>
 	<properties>
 		<maven.test.skip>true</maven.test.skip>
-		<chopsticks.version>1.2.8-SNAPSHOT</chopsticks.version>
+		<chopsticks.version>1.2.9-SNAPSHOT</chopsticks.version>
 		<lombok.version>1.16.22</lombok.version>
 		<shadedArtifactAttached>false</shadedArtifactAttached>
 		<shadedClassifierName><!-- default empty --></shadedClassifierName>
