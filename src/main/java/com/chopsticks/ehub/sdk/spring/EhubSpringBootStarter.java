@@ -42,7 +42,7 @@ public class EhubSpringBootStarter implements EnvironmentAware, BeanFactoryPostP
 		List<String> groupNames = Splitter.on(",").trimResults().omitEmptyStrings().splitToList(env.getRequiredProperty("ehub.groupNames"));
 		String serverPath = env.getProperty("ehub.serverPath");
 		String namesrvAddr = env.getProperty("ehub.namesrvAddr");
-		log.info("enable ehub, groupNames : {}, serverPath : {}", groupNames, serverPath);
+		log.info("enable ehub, groupNames : {}, serverPath : {}, namesrvAddr : {}", groupNames, serverPath, namesrvAddr);
 		for(String groupName : groupNames) {
 			DefaultSdkClient client = new DefaultSdkClient(groupName);
 			client.setServerPath(serverPath);

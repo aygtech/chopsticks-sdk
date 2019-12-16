@@ -6,7 +6,6 @@
 	<artifactId>ehub-sdk</artifactId>
 	<version>1.2.8-SNAPSHOT</version>
 	<properties>
-	    <argLine>-Dfile.encoding=UTF-8</argLine>
 		<maven.test.skip>true</maven.test.skip>
 		<chopsticks.version>1.2.8-SNAPSHOT</chopsticks.version>
 		<lombok.version>1.16.22</lombok.version>
@@ -86,6 +85,7 @@
 					</execution>
 				</executions>
 				<configuration>
+                    <createSourcesJar>true</createSourcesJar>
 					<minimizeJar>${minimizeJar}</minimizeJar>
 					<shadedArtifactAttached>${shadedArtifactAttached}</shadedArtifactAttached>
 					<shadedClassifierName>${shadedClassifierName}</shadedClassifierName>
@@ -135,7 +135,7 @@
 					</relocations>
 				</configuration>
 			</plugin>
-			<!-- doc 
+			<!-- doc -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
@@ -154,7 +154,7 @@
 					</execution>
 				</executions>
 			</plugin> 
-            -->
+            
 			<!-- proguard 
 			<plugin>
 				<groupId>com.github.wvengen</groupId>
@@ -316,101 +316,9 @@
 				</plugins>
 			</build>
 		</profile>
-		<profile>
-			<activation>
-				<activeByDefault>false</activeByDefault>
-			</activation>
-			<id>ayg</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-shade-plugin</artifactId>
-						<executions>
-							<execution>
-								<phase>package</phase>
-								<goals>
-									<goal>shade</goal>
-								</goals>
-							</execution>
-						</executions>
-						<configuration>
-							<minimizeJar>${minimizeJar}</minimizeJar>
-							<shadedArtifactAttached>${shadedArtifactAttached}</shadedArtifactAttached>
-							<shadedClassifierName>${shadedClassifierName}</shadedClassifierName>
-							<createDependencyReducedPom>false</createDependencyReducedPom>
-							<filters>
-								<filter>
-									<artifact>*:*</artifact>
-									<excludes>
-										<exclude>META-INF/*.SF</exclude>
-										<exclude>META-INF/*.DSA</exclude>
-										<exclude>META-INF/*.RSA</exclude>
-									</excludes>
-								</filter>
-							</filters>
-							<artifactSet>
-								<includes>
-									<include>*:*</include>
-								</includes>
-								<excludes>
-									<exclude>org.slf4j:slf4j-api</exclude>
-									<exclude>ch.qos.logback:logback-core</exclude>
-									<exclude>ch.qos.logback:logback-classic</exclude>
-									<exclude>javassist:javassist</exclude>
-								</excludes>
-							</artifactSet>
-							<relocations>
-								<relocation>
-									<pattern>com.chopsticks.core.rocketmq.</pattern>
-									<shadedPattern>com.ayg.ehub.core.rmq.</shadedPattern>
-								</relocation>
-								<relocation>
-									<pattern>com.chopsticks.</pattern>
-									<shadedPattern>com.ayg.ehub.</shadedPattern>
-								</relocation>
-								<relocation>
-									<pattern>org.apache.</pattern>
-									<excludes>
-										<exclude>org.apache.commons.logging.LogFactory</exclude>
-										<exclude>org.apache.commons.logging.Log</exclude>
-									</excludes>
-									<shadedPattern>com.ayg.ehub.plugins.org.apache.</shadedPattern>
-								</relocation>
-								<relocation>
-									<pattern>com.google.</pattern>
-									<shadedPattern>com.ayg.ehub.plugins.com.google.</shadedPattern>
-								</relocation>
-								<relocation>
-									<pattern>io.netty.</pattern>
-									<shadedPattern>com.ayg.ehub.plugins.io.netty.</shadedPattern>
-								</relocation>
-								<relocation>
-									<pattern>com.alibaba.</pattern>
-									<excludes>
-										<exclude>com.alibaba.fastjson.annotation.JSONType</exclude>
-									</excludes>
-									<shadedPattern>com.ayg.ehub.plugins.com.alibaba.</shadedPattern>
-								</relocation>
-							</relocations>
-						</configuration>
-					</plugin>				
-				</plugins>
-			</build>
-			<distributionManagement></distributionManagement>
-		</profile>
+		
 	</profiles>
 	<distributionManagement>
-		<!-- <repository>
-			<id>vtradexnexus-releases</id>
-			<name>public</name>
-			<url>http://nexus.56linked.cn/nexus/content/repositories/releases/</url>
-		</repository>
-		<snapshotRepository>
-			<id>vtradexnexus</id>
-			<name>Snapshots</name>
-			<url>http://nexus.56linked.cn/nexus/content/repositories/snapshots/</url>
-		</snapshotRepository> -->
 		<snapshotRepository>
 	      	<id>ayg-snapshots</id>
 	      	<url>http://test.aiyuangong.com/nexus/content/repositories/snapshots</url>

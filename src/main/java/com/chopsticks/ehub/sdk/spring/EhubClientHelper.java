@@ -31,11 +31,11 @@ import com.chopsticks.ehub.sdk.exception.SdkException;
 import com.chopsticks.ehub.sdk.handler.SdkContextHolder;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import lombok.extern.slf4j.Slf4j;
 
-//此为固定的框架代码，业务开发无需考虑
 @Slf4j
 public class EhubClientHelper extends SdkClientProxy implements SdkTransactionChecker, ApplicationContextAware {
     
@@ -76,85 +76,64 @@ public class EhubClientHelper extends SdkClientProxy implements SdkTransactionCh
 	public void clear() throws Throwable {
 	    Date sub = new Date(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1L));
         List<String> ids = jdbcTemplate.queryForList("select id from message_transaction_event where create_time < ?", String.class, sub);
-        log.info("delete from message_transaction_event where id in (?) : {}", ids);
+        log.trace("delete from message_transaction_event where id in (?) : {}", ids);
         if(!ids.isEmpty()) {
-            int num = jdbcTemplate.update("delete from message_transaction_event where id in ('" + Joiner.on("','").join(ids) + "')");
-            log.info("delete num : {}", num);
-            
+            List<List<String>> parts = Lists.partition(ids, 1000);
+            for(List<String> part : parts) {
+                int num = jdbcTemplate.update("delete from message_transaction_event where id in ('" + Joiner.on("','").join(part) + "')");
+                log.info("delete num : {}", num);
+            }
         }
 	}
-	
-	@Override
-	public <T> T extBeanInvoke(final Object obj, String method, Object... args) {
+	private boolean isTransaction(Object[] args) {
 	    Object[] params = (Object[])args[2];
         boolean isTransaction = params.length > 0 
                                 && params[0] instanceof SdkNoticeCommand 
-                                && ((SdkNoticeCommand)params[0]).isTransaction(); 
+                                && ((SdkNoticeCommand)params[0]).isTransaction();
         if(isTransaction && !TransactionSynchronizationManager.isActualTransactionActive()) {
             throw new SdkException("not in transaction").setCode(SdkException.NOT_IN_TRANSACTION);
         }
+        return isTransaction;
+	}
+	private void InTransaction(final Object obj, final SdkNoticeResult ret) {
+	    TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+            @Override
+            public void afterCompletion(int status) {
+                DefaultModernClient client = (DefaultModernClient)Reflect.on(obj).field("client").get();
+                try {
+                    if(TransactionSynchronization.STATUS_COMMITTED == status) {
+                        client.transactionCommit(ret);
+                        log.info("手工提交 : {}, {}", ret.getId(), BIZ_VALUE.get());
+                    }else if(TransactionSynchronization.STATUS_ROLLED_BACK == status) {
+                        client.transactionRollback(ret, null);
+                        log.warn("手工回滚 : {}, {}", ret.getId(), BIZ_VALUE.get());
+                    }else {
+                        log.error("TransactionSynchronization afterCompletion is unknow : {}", BIZ_VALUE.get());
+                    }
+                } catch(Throwable e) {
+                    log.error("手工事务异常 : " + BIZ_VALUE.get() +  e.getMessage(), e);
+                }
+            }
+        });
+        saveTransactionEvent(ret);
+	}
+	@Override
+	public <T> T extBeanInvoke(final Object obj, String method, Object... args) {
+        boolean isTransaction = isTransaction(args);
         T t = super.extBeanInvoke(obj, method, args);
         if(isTransaction) {
             final SdkNoticeResult ret = (SdkNoticeResult)t;
-            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
-                @Override
-                public void afterCompletion(int status) {
-                    DefaultModernClient client = (DefaultModernClient)Reflect.on(obj).field("client").get();
-                    try {
-                        if(TransactionSynchronization.STATUS_COMMITTED == status) {
-                            client.transactionCommit(ret);
-                            log.info("手工提交 : {}, {}", ret.getId(), BIZ_VALUE.get());
-                        }else if(TransactionSynchronization.STATUS_ROLLED_BACK == status) {
-                            client.transactionRollback(ret, null);
-                            log.info ("手工回滚 : {}, {}", ret.getId(), BIZ_VALUE.get());
-                        }else {
-                            log.error("TransactionSynchronization afterCompletion is unknow : {}", BIZ_VALUE.get());
-                        }
-                    } catch(Throwable e) {
-                        log.error("手工事务异常 : " + BIZ_VALUE.get() +  e.getMessage(), e);
-                    }
-                }
-            });
-            // 保存到DB，此处的保存和业务方法是在同一事务中，所以只要成功，后续兜底回查就可以保证异步调用为可靠的
-            saveTransactionEvent(ret);
+            InTransaction(obj, ret);
         }
 	    return t;
 	}
-	// 拦截所有的异步调用，如果是可靠调用，把结果塞到当前线程变量里面，等 spring 事务提交完毕后再手工提交事务调用
 	@Override
 	public <T> T noticeBeanInvoke(final Object obj, String method, Object... args) {
-		Object[] params = (Object[])args[2];
-		boolean isTransaction = params.length > 0 
-								&& params[0] instanceof SdkNoticeCommand 
-								&& ((SdkNoticeCommand)params[0]).isTransaction(); 
-		if(isTransaction && !TransactionSynchronizationManager.isActualTransactionActive()) {
-			throw new SdkException(BIZ_VALUE.get() + "not in transaction").setCode(SdkException.NOT_IN_TRANSACTION);
-		}
+		boolean isTransaction = isTransaction(args);
 		T t = super.noticeBeanInvoke(obj, method, args);
 		if(isTransaction) {
 			final SdkNoticeResult ret = (SdkNoticeResult)t;
-			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
-				@Override
-				public void afterCompletion(int status) {
-					DefaultModernClient client = (DefaultModernClient)Reflect.on(obj).field("client").get();
-					try {
-						if(TransactionSynchronization.STATUS_COMMITTED == status) {
-							client.transactionCommit(ret);
-							log.info("手工提交 : {}, {}", ret.getId(), BIZ_VALUE.get());
-						}else if(TransactionSynchronization.STATUS_ROLLED_BACK == status) {
-							client.transactionRollback(ret, null);
-							log.info ("手工回滚 : {}, {}", ret.getId(), BIZ_VALUE.get());
-						}else {
-							log.error("TransactionSynchronization afterCompletion is unknow : {}", BIZ_VALUE.get());
-						}
-					} catch(Throwable e) {
-						log.error("手工事务异常 : " + BIZ_VALUE.get() + e.getMessage(), e);
-					}
-					super.afterCompletion(status);
-				}
-			});
-			// 保存到DB，此处的保存和业务方法是在同一事务中，所以只要成功，后续兜底回查就可以保证异步调用为可靠的
-			saveTransactionEvent(ret);
+			InTransaction(obj, ret);
 		}
 		return t; 
 	}
@@ -171,12 +150,7 @@ public class EhubClientHelper extends SdkClientProxy implements SdkTransactionCh
 		}catch (Throwable e) {
 			log.error(e.getMessage(), e);
 		}
-		try {
-		    super.noticeExecuteProxy(obj, method, args);
-		}catch (Throwable e) {
-		    log.error("busi error" + e.getMessage() + " : " + BIZ_VALUE.get());
-		    throw e;
-		}
+	    super.noticeExecuteProxy(obj, method, args);
 		Date exprie = new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(5L));
 		try {
 			cache.add(id, exprie);
@@ -187,15 +161,13 @@ public class EhubClientHelper extends SdkClientProxy implements SdkTransactionCh
 	}
 	private void saveTransactionEvent(SdkNoticeResult ret){
 		Date now = new Date();
-	    log.info("insert into message_transaction_event(id,create_time) values(?,?),{}, {}, {}", ret.getId(), TimeUtils.yyyyMMddHHmmssSSS(now.getTime()), BIZ_VALUE.get());
+	    log.trace("insert into message_transaction_event(id,create_time) values(?,?),{}, {}, {}", ret.getId(), TimeUtils.yyyyMMddHHmmssSSS(now.getTime()), BIZ_VALUE.get());
 	    jdbcTemplate.update("insert into message_transaction_event(id,create_time) values(?,?)", ret.getId(), now);
 	}
 
-	//一般在 spring 的事务结束的回调里面手工提交即可，这里只是用来做手工提交失败（网络异常，进程被kill，硬件出现问题）后的兜底保证
 	@Override
 	public SdkTransactionState check(SdkNoticeResult ret) {
 		String id = ret.getId();
-		// 根据 id 去兜底查询，看最终是要提交还是未知，业务一般很难确定回滚状态，所以一般只需返回 Commit 和 UNKNOW
 		try {
 			if(checkTransaction(ret)) {
 				log.warn("回查兜底 commit : {}", id);
