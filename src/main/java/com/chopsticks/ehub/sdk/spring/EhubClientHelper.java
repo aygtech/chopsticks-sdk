@@ -176,7 +176,8 @@ public class EhubClientHelper extends SdkClientProxy implements SdkTransactionCh
 		}catch (Throwable e) {
 			log.error(e.getMessage(), e);
 		}
-		log.warn("回查兜底 unknow : {}-{}-{}", id, ret.getMessageExt().getCommitLogOffset(), ret.getMessageExt().getPreparedTransactionOffset());
+		Reflect.on(ret.getMessageExt()).field("msgId").get();
+		log.warn("回查兜底 unknow : {}-{}-{}", id, Reflect.on(ret.getMessageExt()).field("msgId").get(), ret.getMessageExt().getPreparedTransactionOffset());
 		return SdkTransactionState.UNKNOW;
 	}
 

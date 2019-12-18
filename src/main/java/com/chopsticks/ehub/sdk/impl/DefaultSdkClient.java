@@ -587,5 +587,7 @@ public class DefaultSdkClient implements SdkClient{
 	public SdkNoticeResult sdkNotice(Object orderedKey, String clazz, String method, Object... params) {
 		return this.getSdkExtBean(clazz).sdkNotice(new SdkNoticeCommand(method, params), orderedKey);
 	}
-	
+    public void transactionCommit(String msgId) {
+        innerClient.transactionCommit(msgId);
+    }
 }

@@ -11,7 +11,7 @@
 		<lombok.version>1.16.22</lombok.version>
 		<shadedArtifactAttached>false</shadedArtifactAttached>
 		<shadedClassifierName><!-- default empty --></shadedClassifierName>
-		<minimizeJar>false</minimizeJar>
+		<minimizeJar>true</minimizeJar>
 	</properties>
 	<dependencyManagement>
         <dependencies>
@@ -85,7 +85,6 @@
 					</execution>
 				</executions>
 				<configuration>
-                    <createSourcesJar>true</createSourcesJar>
 					<minimizeJar>${minimizeJar}</minimizeJar>
 					<shadedArtifactAttached>${shadedArtifactAttached}</shadedArtifactAttached>
 					<shadedClassifierName>${shadedClassifierName}</shadedClassifierName>
