@@ -150,7 +150,12 @@ public class EhubClientHelper extends SdkClientProxy implements SdkTransactionCh
 		}catch (Throwable e) {
 			log.error(e.getMessage(), e);
 		}
-	    super.noticeExecuteProxy(obj, method, args);
+		try {
+		    BIZ_VALUE.remove();
+		    super.noticeExecuteProxy(obj, method, args);
+		}finally {
+		    BIZ_VALUE.remove();
+		}
 		Date exprie = new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(5L));
 		try {
 			cache.add(id, exprie);

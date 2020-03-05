@@ -6,12 +6,13 @@
 	<artifactId>ehub-sdk</artifactId>
 	<version>1.2.9-SNAPSHOT</version>
 	<properties>
+    
 		<maven.test.skip>true</maven.test.skip>
 		<chopsticks.version>1.2.9-SNAPSHOT</chopsticks.version>
 		<lombok.version>1.16.22</lombok.version>
 		<shadedArtifactAttached>false</shadedArtifactAttached>
 		<shadedClassifierName><!-- default empty --></shadedClassifierName>
-		<minimizeJar>true</minimizeJar>
+		<minimizeJar>false</minimizeJar>
 	</properties>
 	<dependencyManagement>
         <dependencies>
@@ -60,6 +61,11 @@
 		    <artifactId>spring-boot-configuration-processor</artifactId>
 		    <optional>true</optional>
 		</dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
 	</dependencies>
 	<build>
 		<plugins>

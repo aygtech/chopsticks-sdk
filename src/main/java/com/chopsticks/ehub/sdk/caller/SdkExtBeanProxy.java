@@ -24,7 +24,7 @@ public class SdkExtBeanProxy extends ExtBeanProxy{
 		if(client.getModernClientProxy() instanceof SdkClientProxy) {
 			return ((SdkClientProxy)client.getModernClientProxy()).extBeanInvoke(this, "sdkInnerInvoke", proxy, method, args);
 		}else {
-			return innerInvoke(proxy, method, args);
+			return sdkInnerInvoke(proxy, method, args);
 		}
 	}
 	public Object sdkInnerInvoke(Object proxy, Method method, Object[] args) throws Throwable {
