@@ -445,6 +445,11 @@ public class DefaultSdkClient implements SdkClient{
 	public void setNamesrvAddr(String namesrvAddr) {
 		innerClient.setNamesrvAddr(namesrvAddr);
 	}
+
+	public void setFilterTags(Boolean filterTags) {
+		innerClient.setFilterTags(filterTags);
+	}
+
 	/**
 	 * 设置异步执行失败重试次数, 默认都是 Integer.MAX_VALUE
 	 * {@link #setNoticeExcecutableRetryCount(int)}

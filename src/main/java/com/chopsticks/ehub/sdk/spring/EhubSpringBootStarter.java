@@ -26,7 +26,7 @@ import com.google.common.collect.Maps;
 import com.google.common.primitives.Primitives;
 
 import lombok.extern.slf4j.Slf4j;
-
+import org.springframework.util.StringUtils;
 
 
 @Slf4j
@@ -42,11 +42,17 @@ public class EhubSpringBootStarter implements EnvironmentAware, BeanFactoryPostP
 		List<String> groupNames = Splitter.on(",").trimResults().omitEmptyStrings().splitToList(env.getRequiredProperty("ehub.groupNames"));
 		String serverPath = env.getProperty("ehub.serverPath");
 		String namesrvAddr = env.getProperty("ehub.namesrvAddr");
+		String consumerFilterTags = env.getProperty("ehub.consumer.filter.tags");
+		Boolean filterTags = false;
+		if (null != consumerFilterTags && "true".equals(consumerFilterTags)) {
+			filterTags = true;
+		}
 		log.info("enable ehub, groupNames : {}, serverPath : {}, namesrvAddr : {}", groupNames, serverPath, namesrvAddr);
 		for(String groupName : groupNames) {
 			DefaultSdkClient client = new DefaultSdkClient(groupName);
 			client.setServerPath(serverPath);
 			client.setNamesrvAddr(namesrvAddr);
+			client.setFilterTags(filterTags);
 			clients.put(groupName, client);
 			beanFactory.registerSingleton(groupName, client);
 		}
