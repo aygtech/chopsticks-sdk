@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.chopsticks.ehub</groupId>
 	<artifactId>ehub-sdk</artifactId>
-	<version>1.3.0-SNAPSHOT</version>
+	<version>1.3.2-SNAPSHOT</version>
 	<properties>
     
 		<maven.test.skip>true</maven.test.skip>
@@ -132,13 +132,13 @@
 							<pattern>io.netty.</pattern>
 							<shadedPattern>com.chopsticks.ehub.plugins.io.netty.</shadedPattern>
 						</relocation>
-						<relocation>
+						<!--<relocation>
 							<pattern>com.alibaba.</pattern>
 							<excludes>
 								<exclude>com.alibaba.fastjson.annotation.JSONType</exclude>
 							</excludes>
 							<shadedPattern>com.chopsticks.ehub.plugins.com.alibaba.</shadedPattern>
-						</relocation>
+						</relocation>-->
 					</relocations>
 				</configuration>
 			</plugin>
@@ -279,13 +279,13 @@
 									<pattern>io.netty.</pattern>
 									<shadedPattern>com.chopsticks.ehub.plugins.io.netty.</shadedPattern>
 								</relocation>
-								<relocation>
+								<!--<relocation>
 									<pattern>com.alibaba.</pattern>
 									<excludes>
 										<exclude>com.alibaba.fastjson.annotation.JSONType</exclude>
 									</excludes>
 									<shadedPattern>com.chopsticks.ehub.plugins.com.alibaba.</shadedPattern>
-								</relocation>
+								</relocation>-->
 							</relocations>
 						</configuration>
 					</plugin>				
